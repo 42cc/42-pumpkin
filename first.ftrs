@@ -1,0 +1,10 @@
+Feature: Work
+    In order to get Pumpkin working
+    As it`s developer
+    I want to test it
+
+    Scenario: Give pumpkin some file to process
+        Given I Have pumpkin app
+        When I give it a file named first.ftrs
+        Then I Should see succesfull output
+
