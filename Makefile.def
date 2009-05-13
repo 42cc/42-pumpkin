@@ -4,10 +4,10 @@
 ##### copy this file to Makefile.def and set BASE path to you own project directory
 
 customer=42
-projshort=towel
+projshort=pumpkin
 proj=$(customer)-$(projshort)
 ver=$(shell cat .version)
-app=towel
+app=pumpkin
 
 BASE=/path/to/$(proj)
 SITE=/path/to/$(proj)/lib
