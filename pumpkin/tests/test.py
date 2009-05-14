@@ -14,8 +14,22 @@ def test_some_text():
     feature = parser.parse(text)
     assert feature.name == None
 
-def test_right():
-    """parse valid feature definition"""
+def test_right_name():
+    """parse valid feature name (one line)"""
     text = """Feature: Testing"""
     feature = parser.parse(text)
     assert feature.name == "Testing"
+
+def test_full_definition():
+    """parsing full feature definition"""
+    text = """Feature: Testing feature
+        As a developer
+        In order to test software
+        I want to use nice tools"""
+    feature = parser.parse(text)
+    assert feature.name == "Testing feature"
+    assert feature.description[0] == "As a developer"
+    assert feature.description[1] == "In order to test software"
+    assert feature.description[2] == "I want to use nice tools"
+
+

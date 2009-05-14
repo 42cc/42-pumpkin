@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 class feature(object):
-    def __init__(self,name=None, description=None):
+    def __init__(self,name=None, description=[]):
         self.description = description
         self.name = name
 
