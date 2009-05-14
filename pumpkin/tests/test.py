@@ -4,6 +4,6 @@ from pumpkin import parser
     
 def test_empty_text():
     text = ""
-    returnfeature = parser.parse(text)
-    assert(returnfeature.description == text)
+    feature = parser.parse(text)
+    assert feature.description == text
 
