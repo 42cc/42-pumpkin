@@ -14,13 +14,19 @@ def test_some_text():
     feature = parser.parse(text)
     assert feature.name == None
 
-def test_right_name():
-    """parse valid feature name (one line)"""
+def test_right_name_space():
+    """parse valid feature name (one line)(with space after "Feature:" """
     text = """Feature: Testing"""
     feature = parser.parse(text)
     assert feature.name == "Testing"
 
-def test_full_definition():
+def test_right_name_nospace():
+    """parse valid feature name (one line)"""
+    text = """Feature:Testing"""
+    feature = parser.parse(text)
+    assert feature.name == "Testing"
+
+def _test_full_definition():
     """parsing full feature definition"""
     text = """Feature: Testing feature
         As a developer

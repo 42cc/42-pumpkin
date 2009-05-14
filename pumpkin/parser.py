@@ -8,7 +8,7 @@ class feature(object):
 
 def parse(text):
     if "Feature:" in text:
-        name = text[9:]
+        name = text[len("Feature:"):].strip()
         ft = feature(name)
     else:
         ft = feature()
