@@ -19,6 +19,7 @@ def setup():
 
 def teardown():
     sys.stderr = STDERR
+    feature = None
 
 def test_empty():
     """parse with empty text as parameter"""
@@ -73,14 +74,14 @@ def test_full_definition():
     text = \
 """\
 Feature: Testing feature
-    As a developer
     In order to test software
+    As a developer
     I want to use nice tools\
 """
     feature = parser.parse(text)
     assert feature.name == "Testing feature"
-    assert feature.description[0] == "As a developer"
-    assert feature.description[1] == "In order to test software"
+    assert feature.description[0] == "In order to test software"
+    assert feature.description[1] == "As a developer"
     assert feature.description[2] == "I want to use nice tools"
 
 def test_empty_line():
@@ -88,8 +89,8 @@ def test_empty_line():
     text = \
 """\
 Feature: Testing feature2
-    As a developer
     In order to test software
+    As a developer
     I want to use nice tools
     
 """
@@ -102,8 +103,8 @@ def _test_scenario():
     text = \
 """\
 Feature: Testing feature
-    As a developer
     In order to test software
+    As a developer
     I want to use nice tools
     
     Scenario: test_blue_sky\
