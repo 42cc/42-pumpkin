@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+import sys
+
+
 class feature(object):
     def __init__(self,name=None, description=[]):
         self.description = description
@@ -22,7 +25,7 @@ def create_feature(line):
     if line.startswith("Feature:") :
         name = line[len("Feature:"):].strip()
         ft = feature(name)
-        print(ft.name)
     else:
         ft = feature()
+        sys.stderr.write("wrong definition of feature on line: \n%s\n" % line)
     return ft
