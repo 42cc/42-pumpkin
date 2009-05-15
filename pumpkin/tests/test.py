@@ -7,12 +7,13 @@ STDERR = None
 
 def setup():
     class mockstderr:
-      def __init__(self):
-        self.fl=""
-      def write(self,x):
-        self.fl=x
-      def read(self):
-        return self.fl
+        """mocking sys.stderr"""
+        def __init__(self):
+            self.fl=""
+        def write(self,x):
+            self.fl=x
+        def read(self):
+            return self.fl
     STDERR=sys.stderr
     sys.stderr=mockstderr()
 
@@ -69,14 +70,42 @@ def test_feature_mid():
 
 def test_full_definition():
     """parsing full feature definition"""
-    text = """Feature: Testing feature
-        As a developer
-        In order to test software
-        I want to use nice tools"""
+    text = \
+"""\
+Feature: Testing feature
+    As a developer
+    In order to test software
+    I want to use nice tools\
+"""
     feature = parser.parse(text)
     assert feature.name == "Testing feature"
     assert feature.description[0] == "As a developer"
     assert feature.description[1] == "In order to test software"
     assert feature.description[2] == "I want to use nice tools"
 
+def test_empty_line():
+    """testing empty line processing, after the feature definition"""
+    text = \
+"""\
+Feature: Testing feature2
+    As a developer
+    In order to test software
+    I want to use nice tools
+    
+"""
+    feature = parser.parse(text)
+    assert feature.name == "Testing feature2"
+    assert len(feature.description) == 3
 
+def _test_scenario():
+    """testing that scenario definition not is added to the feature definition"""
+    text = \
+"""\
+Feature: Testing feature
+    As a developer
+    In order to test software
+    I want to use nice tools
+    
+    Scenario: test_blue_sky\
+"""
+    feature = parser.parse(text)

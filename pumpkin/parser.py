@@ -17,6 +17,7 @@ def parse(text):
             ft = create_feature(line)
         elif not ft == None:
             ft.description.append(line.strip())
+    print ft.description
     return ft
 
 
