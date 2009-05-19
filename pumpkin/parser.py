@@ -4,6 +4,7 @@ import sys
 class scenario(object):
     def __init__(self,name=None):
         self.name = name
+        self.steps = []
 
 class feature(object):
     def __init__(self,name=None, description=None):
@@ -27,10 +28,19 @@ def parse(text):
                 ft = add_description(ft,line.strip())
             if line.strip() == "":
                 STATE = "scenario"
-                print "looking for "+STATE
         elif STATE == "scenario":
-            print line
-            ft = create_scenario(ft,line.strip())
+            if line.strip() == "":
+                sys.stderr.write("Warning:Extra empty lines after feature definition")
+                continue
+            elif line.startswith("    "):
+                ft = create_scenario(ft,line.strip())
+                STATE = "step"
+        elif STATE == "step":
+            if line.strip() == "":
+                pass
+            elif line.startswith("        "):
+                ft = add_step(ft,line.strip())
+
         else:
             print "dunno"
     return ft
@@ -38,7 +48,6 @@ def parse(text):
 
 def create_feature(line):
     """parse line of text and create feature"""
-    print line
     if line.startswith("Feature:") :
         name = line[len("Feature:"):].strip()
         ft = feature(name)
@@ -61,5 +70,13 @@ def create_scenario(feature,line):
     if line.startswith("Scenario:"):
         sc = scenario(line[len("Scenario:"):].strip())
         feature.scenarios.append(sc)
-        print sc.name
+    return feature
+
+
+
+def add_step(feature,line):
+    if line.startswith("Given") \
+        or line.startswith("When") \
+        or line.startswith("Then"):
+        feature.scenarios[-1].steps.append(line)
     return feature

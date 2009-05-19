@@ -101,7 +101,7 @@ Feature: Testing feature2
     assert len(feature.description) == 3
 
 def test_scenario():
-    """testing that scenario definition not is added to the feature definition but added to the scenario"""
+    """testing that scenario definition not is added to the feature description but treaten as a scenario"""
     text = \
 """\
 Feature: Testing feature
@@ -114,4 +114,67 @@ Feature: Testing feature
     feature = parser.parse(text)
     assert len(feature.description) == 3
     assert feature.scenarios[0].name == "Test_blue_sky"
+
+def test_scenario_twolines():
+    """
+    Same as before, but two lines before scenario definition
+    autoindent included
+    """
+    text = \
+"""\
+Feature: Testing feature
+    In order to test software
+    As a developer
+    I want to use nice tools
+
+
+    Scenario: Test_blue_sky\
+"""
+    feature = parser.parse(text)
+    assert len(feature.description) == 3
+    assert feature.scenarios[0].name == "Test_blue_sky"
+    err = sys.stderr.read()
+    assert err == "Warning:Extra empty lines after feature definition"
+
+def test_one_step():
+    """
+    test processing of first step (given)
+    """
+    text = \
+"""\
+Feature: Testing feature
+    In order to test software
+    As a developer
+    I want to use nice tools
+    
+    Scenario: Test_blue_sky
+        Given I am human\
+"""
+    feature = parser.parse(text)
+    assert feature.scenarios[0].name == "Test_blue_sky"
+    assert feature.scenarios[0].steps[0] == "Given I am human"
+    
+def test_steps():
+    """
+    test processing of multiple steps 
+    """
+    text = \
+"""\
+Feature: Testing feature
+    In order to test software
+    As a developer
+    I want to use nice tools
+    
+    Scenario: Test_blue_sky
+        Given I am human
+        When I look at the sky
+        Then I see that it`s blue\
+"""
+    feature = parser.parse(text)
+    assert feature.scenarios[0].name == "Test_blue_sky"
+    assert feature.scenarios[0].steps[0] == "Given I am human"
+    assert feature.scenarios[0].steps[1] == "When I look at the sky"
+    assert feature.scenarios[0].steps[2] == "Then I see that it`s blue"
+
+
 
