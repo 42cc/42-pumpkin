@@ -26,10 +26,10 @@ def parse(text):
             ft = create_feature(line)
             STATE = "f.description"
         elif STATE == "f.description":
-            if line.startswith("    "):
-                ft = add_description(ft,line.strip())
             if line.strip() == "":
                 STATE = "scenario"
+            elif line.startswith("    "):
+                ft = add_description(ft,line.strip())
         elif STATE == "scenario":
             if line.strip() == "":
                 sys.stderr.write("Warning:Extra empty lines after feature definition")
@@ -49,25 +49,26 @@ def parse(text):
 def indent_style(text):
     """
     identify tab-style of the given text
-    single space, double-space,four-space, tabs, or something else
+    (single space, double-space, four-space, tabs, or something else)
+    and convert it to single standart (four-spaces at the moment)
+
+    in future: possibly clean-up text, erase comment & etc
     """
     import re
     lines = text.split("\n")
-    tabsymbol = ""
+    tabsymbol = ""                      #tabulation actually used in text
     if len(lines) > 1:
         for symbol in lines[1]:
             if re.match('\s',symbol):
-                tabsymbol += symbol
+                tabsymbol += symbol     #for multi-spaces
             else:
                 break
-        print "("+tabsymbol+")"
-        indsymbol = "    "
+        indsymbol = "    "              #indentation symbol that we use
         newlines = []
         for line in lines:
             line = re.sub('^'+tabsymbol,indsymbol,line)
             line = re.sub('^'+indsymbol+tabsymbol,indsymbol+indsymbol,line)
             newlines.append(line)
-        print newlines
         return newlines
     else:
         return lines
@@ -91,6 +92,9 @@ def add_description(feature,line):
             if feature.description == None:
                 feature.description = []
             feature.description.append(line.strip())
+    else:
+        sys.stderr.write("bad feature description on line: %s" % line)
+
     return feature
 
 def create_scenario(feature,line):
@@ -98,8 +102,6 @@ def create_scenario(feature,line):
         sc = scenario(line[len("Scenario:"):].strip())
         feature.scenarios.append(sc)
     return feature
-
-
 
 def add_step(feature,line):
     if line.startswith("Given") \

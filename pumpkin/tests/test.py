@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
 """tests for pumpkin app"""
-from pumpkin import parser
 import sys
+import os
+
+FILEDIR = os.path.abspath(os.path.dirname(__file__))
+PROJECT_ROOT = os.path.join(FILEDIR,"../../")
+sys.path.append(PROJECT_ROOT) #just in case (or for standalone coverage)
+sys.path.append(os.path.join(PROJECT_ROOT,"lib/tddspry/general"))
+sys.path.append(os.path.join(PROJECT_ROOT,"pumpkin/tests"))
+from mock import Mock
+from pumpkin import parser
 STDERR = None   
 
 def setup():
-    sys.path.append("/home/meako/documents/Navch/dyplom/42-pumpkin/lib/tddspry/general")
-    from mock import Mock
     class mockstderr(Mock):
         """mocking sys.stderr"""
         def __init__(self):
@@ -85,6 +91,21 @@ Feature: Testing feature
     assert feature.description[0] == "In order to test software"
     assert feature.description[1] == "As a developer"
     assert feature.description[2] == "I want to use nice tools"
+
+def test_bad_definition():
+    """bad feature definition"""
+    text = \
+"""\
+Feature: Testing feature
+    In order to test software
+    Not As a developer
+    We dont want to use nice tools\
+"""
+    feature = parser.parse(text)
+    assert feature.name == "Testing feature"
+    assert feature.description[0] == "In order to test software"
+    assert len(feature.description) == 1
+    assert sys.stderr.read() == "bad feature description on line: We dont want to use nice tools"
 
 def test_empty_line():
     """testing empty line processing, after the feature definition"""
@@ -218,6 +239,3 @@ Feature: Testing feature
     assert feature.description[0] == "In order to test software"
     assert feature.scenarios[0].name == "Test_blue_sky"
     assert feature.scenarios[0].steps[0] == "Given I am human"
-
-
-
