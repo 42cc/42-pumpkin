@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 import sys
 
+class scenario(object):
+    def __init__(self,name=None):
+        self.name = name
 
 class feature(object):
     def __init__(self,name=None, description=None):
         self.description = description
         self.name = name
+        self.scenarios = []
 
    
 
@@ -17,20 +21,24 @@ def parse(text):
     for line in text.split("\n"):
         if STATE == "feature":
             ft = create_feature(line)
-            print "feature created, name (%s)" % ft.name
             STATE = "f.description"
         elif STATE == "f.description":
             if line.startswith("    "):
                 ft = add_description(ft,line.strip())
-                print "description!"
+            if line.strip() == "":
+                STATE = "scenario"
+                print "looking for "+STATE
+        elif STATE == "scenario":
+            print line
+            ft = create_scenario(ft,line.strip())
         else:
             print "dunno"
-    print ft.description
     return ft
 
 
 def create_feature(line):
     """parse line of text and create feature"""
+    print line
     if line.startswith("Feature:") :
         name = line[len("Feature:"):].strip()
         ft = feature(name)
@@ -49,3 +57,9 @@ def add_description(feature,line):
             feature.description.append(line.strip())
     return feature
 
+def create_scenario(feature,line):
+    if line.startswith("Scenario:"):
+        sc = scenario(line[len("Scenario:"):].strip())
+        feature.scenarios.append(sc)
+        print sc.name
+    return feature

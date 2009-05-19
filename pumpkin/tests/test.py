@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """tests for pumpkin app"""
 from pumpkin import parser
-#import nose.plugins.capture as capture
 import sys
 STDERR = None   
 
 def setup():
-    class mockstderr:
+    sys.path.append("/home/meako/documents/Navch/dyplom/42-pumpkin/lib/tddspry/general")
+    from mock import Mock
+    class mockstderr(Mock):
         """mocking sys.stderr"""
         def __init__(self):
             self.fl=""
@@ -20,6 +21,7 @@ def setup():
 def teardown():
     sys.stderr = STDERR
     feature = None
+    text = None
 
 def test_empty():
     """parse with empty text as parameter"""
@@ -98,8 +100,8 @@ Feature: Testing feature2
     assert feature.name == "Testing feature2"
     assert len(feature.description) == 3
 
-def _test_scenario():
-    """testing that scenario definition not is added to the feature definition"""
+def test_scenario():
+    """testing that scenario definition not is added to the feature definition but added to the scenario"""
     text = \
 """\
 Feature: Testing feature
@@ -107,6 +109,9 @@ Feature: Testing feature
     As a developer
     I want to use nice tools
     
-    Scenario: test_blue_sky\
+    Scenario: Test_blue_sky\
 """
     feature = parser.parse(text)
+    assert len(feature.description) == 3
+    assert feature.scenarios[0].name == "Test_blue_sky"
+
