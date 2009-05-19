@@ -43,8 +43,8 @@ def test_some_text():
 
 def test_right_name_space():
     """
-    parse valid feature name (one line)
-    (with space after "Feature:")
+    parse valid feature name (space)
+    (one line with space after "Feature:")
     """
     text = """Feature: Testing"""
     feature = parser.parse(text)
@@ -52,8 +52,8 @@ def test_right_name_space():
 
 def test_right_name_nospace():
     """
-    parse valid feature name (one line)
-    (without space after "Feature:")
+    parse valid feature name (nospace)
+    (one line without space after "Feature:")
     """
     text = """Feature:Testing"""
     feature = parser.parse(text)
@@ -175,6 +175,49 @@ Feature: Testing feature
     assert feature.scenarios[0].steps[0] == "Given I am human"
     assert feature.scenarios[0].steps[1] == "When I look at the sky"
     assert feature.scenarios[0].steps[2] == "Then I see that it`s blue"
+
+
+def test_tabstyle_2spaces():
+    """
+    test gherkin, marked up with 2-space indents
+    """
+    text = \
+"""\
+Feature: Testing feature
+  In order to test software
+  As a developer
+  I want to use nice tools
+
+  Scenario: Test_blue_sky
+    Given I am human
+    When I look at the sky
+    Then I see that it`s blue\
+"""
+    feature = parser.parse(text)
+    assert feature.description[0] == "In order to test software"
+    assert feature.scenarios[0].name == "Test_blue_sky"
+    assert feature.scenarios[0].steps[0] == "Given I am human"
+
+def test_tabstyle_tabulations():
+    """
+    marked up with tabs
+    """
+    text = \
+"""\
+Feature: Testing feature
+\tIn order to test software
+\tAs a developer
+\tI want to use nice tools
+
+\tScenario: Test_blue_sky
+\t\tGiven I am human
+\t\tWhen I look at the sky
+\t\tThen I see that it`s blue\
+"""
+    feature = parser.parse(text)
+    assert feature.description[0] == "In order to test software"
+    assert feature.scenarios[0].name == "Test_blue_sky"
+    assert feature.scenarios[0].steps[0] == "Given I am human"
 
 
 

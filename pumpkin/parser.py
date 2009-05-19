@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
 
+
 class scenario(object):
     def __init__(self,name=None):
         self.name = name
@@ -19,7 +20,8 @@ def parse(text):
 
     STATE = "feature"
     ft = None
-    for line in text.split("\n"):
+    text = indent_style(text)
+    for line in text:
         if STATE == "feature":
             ft = create_feature(line)
             STATE = "f.description"
@@ -40,10 +42,35 @@ def parse(text):
                 pass
             elif line.startswith("        "):
                 ft = add_step(ft,line.strip())
-
         else:
             print "dunno"
     return ft
+
+def indent_style(text):
+    """
+    identify tab-style of the given text
+    single space, double-space,four-space, tabs, or something else
+    """
+    import re
+    lines = text.split("\n")
+    tabsymbol = ""
+    if len(lines) > 1:
+        for symbol in lines[1]:
+            if re.match('\s',symbol):
+                tabsymbol += symbol
+            else:
+                break
+        print "("+tabsymbol+")"
+        indsymbol = "    "
+        newlines = []
+        for line in lines:
+            line = re.sub('^'+tabsymbol,indsymbol,line)
+            line = re.sub('^'+indsymbol+tabsymbol,indsymbol+indsymbol,line)
+            newlines.append(line)
+        print newlines
+        return newlines
+    else:
+        return lines
 
 
 def create_feature(line):
