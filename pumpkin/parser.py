@@ -1,48 +1,59 @@
 # -*- coding: utf-8 -*-
+"""
+Pumpkin parser module
+parses Gherkin-marked text and returns object
+with tree-like structure
+"""
 import sys
 
 
-class scenario(object):
-    def __init__(self,name=None):
-        self.name = name
-        self.steps = []
+class Feature(object):
+    """Feature: Contains test reasons, goals and test scenarios"""
 
-class feature(object):
-    def __init__(self,name=None, description=None):
+    def __init__(self, name=None, description=None):
         self.description = description
         self.name = name
         self.scenarios = []
 
-   
+
+class Scenario(object):
+    """Scenario: set of steps that define tests behaviour"""
+
+    def __init__(self, name=None):
+        self.name = name
+        self.steps = []
+
 
 def parse(text):
     """process text marked up with Gherkin"""
 
-    STATE = "feature"
-    ft = None
+    state = "feature"
+    feature = None
     text = indent_style(text)
     for line in text:
-        if STATE == "feature":
-            ft = create_feature(line)
-            STATE = "f.description"
-        elif STATE == "f.description":
+        if state == "feature":
+            feature = create_feature(line)
+            state = "f.description"
+        elif state == "f.description":
             if line.strip() == "":
-                STATE = "scenario"
+                state = "scenario"
             elif line.startswith("    "):
-                ft = add_description(ft,line.strip())
-        elif STATE == "scenario":
+                feature = add_description(feature, line.strip())
+        elif state == "scenario":
             if line.strip() == "":
-                sys.stderr.write("Warning: Extra empty lines before scenario definition")
+                sys.stderr.write(\
+                "Warning: Extra empty lines before scenario definition")
                 continue
             elif line.startswith("    "):
-                ft = create_scenario(ft,line.strip())
-                STATE = "step"
-        elif STATE == "step":
+                feature = create_scenario(feature, line.strip())
+                state = "step"
+        elif state == "step":
             if line.strip() == "":
-                STATE = "scenario"
+                state = "scenario"
             elif line.startswith("        "):
-                ft = add_step(ft,line.strip())
-    return ft
+                feature = add_step(feature, line.strip())
+    return feature
+
 
 def indent_style(text):
     """
@@ -57,15 +68,15 @@ def indent_style(text):
     tabsymbol = ""                      #tabulation actually used in text
     if len(lines) > 1:
         for symbol in lines[1]:
-            if re.match('\s',symbol):
+            if re.match('\s', symbol):
                 tabsymbol += symbol     #for multi-spaces
             else:
                 break
         indsymbol = "    "              #indentation symbol that we use
         newlines = []
         for line in lines:
-            line = re.sub('^'+tabsymbol,indsymbol,line)
-            line = re.sub('^'+indsymbol+tabsymbol,indsymbol+indsymbol,line)
+            line = re.sub('^'+tabsymbol, indsymbol, line)
+            line = re.sub('^'+indsymbol+tabsymbol, indsymbol+indsymbol, line)
             newlines.append(line)
         return newlines
     else:
@@ -74,34 +85,40 @@ def indent_style(text):
 
 def create_feature(line):
     """parse line of text and create feature"""
-    if line.startswith("Feature:") :
+    if line.startswith("Feature:"):
         name = line[len("Feature:"):].strip()
-        ft = feature(name)
+        feature = Feature(name)
     else:
-        ft = feature()
+        feature = Feature()
         sys.stderr.write("wrong definition of feature on line: \n%s\n" % line)
-    return ft
+    return feature
 
-def add_description(feature,line):
+
+def add_description(feature, line):
     """parse line for description definition"""
+
     if line.startswith("In order") \
-        or line.startswith("As") \
-        or line.startswith("I want"):
-            if feature.description == None:
-                feature.description = []
-            feature.description.append(line.strip())
+    or line.startswith("As") \
+    or line.startswith("I want"):
+        if feature.description == None:
+            feature.description = []
+        feature.description.append(line.strip())
     else:
         sys.stderr.write("bad feature description on line: %s" % line)
 
     return feature
 
-def create_scenario(feature,line):
+
+def create_scenario(feature, line):
+    """create and append scenario to the feature, passed to the func"""
     if line.startswith("Scenario:"):
-        sc = scenario(line[len("Scenario:"):].strip())
-        feature.scenarios.append(sc)
+        scenario = Scenario(line[len("Scenario:"):].strip())
+        feature.scenarios.append(scenario)
     return feature
 
-def add_step(feature,line):
+
+def add_step(feature, line):
+    """append step definition to the scenarios of feature"""
     if line.startswith("Given") \
         or line.startswith("When") \
         or line.startswith("Then"):

@@ -16,7 +16,9 @@ from pumpkin import parser
 STDERR = None   
 
 def setup():
-    class mockstderr(Mock):
+    """functions that run before running tests"""
+
+    class Mockstderr(Mock):
         """
         mocking sys.stderr
         warning: method sys.stderr.read() used in tests
@@ -25,19 +27,17 @@ def setup():
         real stderr does not return EOF
         """
         def __init__(self):
-            self.fl=""
-        def write(self,x):
-            self.fl=x
+            self.text = ""
+        def write(self, err):
+            self.text = err
         def read(self):
-            return self.fl
+            return self.text
     STDERR = sys.stderr
-    sys.stderr = mockstderr()
+    sys.stderr = Mockstderr()
 
 def teardown():
+    """runs after tests"""
     sys.stderr = STDERR
-    #sys.stderr.write("teardown")
-    feature = None
-    text = None
 
 def test_empty():
     """parse with empty text as parameter"""
@@ -115,7 +115,8 @@ Feature: Testing feature
     assert feature.name == "Testing feature"
     assert feature.description[0] == "In order to test software"
     assert len(feature.description) == 1
-    assert sys.stderr.read() == "bad feature description on line: We dont want to use nice tools"
+    assert sys.stderr.read() == \
+    "bad feature description on line: We dont want to use nice tools"
 
 def test_empty_line():
     """testing empty line processing, after the feature definition"""
@@ -132,7 +133,8 @@ Feature: Testing feature2
     assert len(feature.description) == 3
 
 def test_scenario():
-    """testing that scenario definition not is added to the feature description but treaten as a scenario"""
+    """testing that scenario is treaten as a scenario
+    and not added to the feature description"""
     text = \
 """\
 Feature: Testing feature
@@ -251,7 +253,7 @@ Feature: Testing feature
     assert feature.scenarios[0].steps[0] == "Given I am human"
 
 
-def test_two_scenarios():
+def test_three_scenarios():
     """
     processing of multiple scenarios 
     """
@@ -270,7 +272,12 @@ Feature: Testing feature
     Scenario: Test_green_grass
         Given I am on the field
         When I sit down
-        Then My pants become green because of grass\
+        Then My pants become green because of grass
+
+    Scenario: Test_yello_sand
+        Given I am in the sandstorm
+        When I jump up
+        Then I jump in the sand\
 """
     feature = parser.parse(text)
     #sys.stderr.write("")
@@ -279,4 +286,10 @@ Feature: Testing feature
     assert feature.scenarios[1].name == "Test_green_grass"
     assert feature.scenarios[1].steps[0] == "Given I am on the field"
     assert feature.scenarios[1].steps[1] == "When I sit down"
-    assert feature.scenarios[1].steps[2] == "Then My pants become green because of grass"
+    assert feature.scenarios[1].steps[2] == \
+    "Then My pants become green because of grass"
+    assert feature.scenarios[2].name == "Test_yello_sand"
+    assert feature.scenarios[2].steps[0] == "Given I am in the sandstorm"
+    assert feature.scenarios[2].steps[1] == "When I jump up"
+    assert feature.scenarios[2].steps[2] == "Then I jump in the sand"
+
