@@ -32,18 +32,16 @@ def parse(text):
                 ft = add_description(ft,line.strip())
         elif STATE == "scenario":
             if line.strip() == "":
-                sys.stderr.write("Warning:Extra empty lines after feature definition")
+                sys.stderr.write("Warning: Extra empty lines before scenario definition")
                 continue
             elif line.startswith("    "):
                 ft = create_scenario(ft,line.strip())
                 STATE = "step"
         elif STATE == "step":
             if line.strip() == "":
-                pass
+                STATE = "scenario"
             elif line.startswith("        "):
                 ft = add_step(ft,line.strip())
-        else:
-            print "dunno"
     return ft
 
 def indent_style(text):

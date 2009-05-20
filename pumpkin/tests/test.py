@@ -3,29 +3,39 @@
 import sys
 import os
 
+#All those path manipulations are not mandatory.
+#Just made them for my personal convenience
 FILEDIR = os.path.abspath(os.path.dirname(__file__))
 PROJECT_ROOT = os.path.join(FILEDIR,"../../")
 sys.path.append(PROJECT_ROOT) #just in case (or for standalone coverage)
 sys.path.append(os.path.join(PROJECT_ROOT,"lib/tddspry/general"))
 sys.path.append(os.path.join(PROJECT_ROOT,"pumpkin/tests"))
+
 from mock import Mock
 from pumpkin import parser
 STDERR = None   
 
 def setup():
     class mockstderr(Mock):
-        """mocking sys.stderr"""
+        """
+        mocking sys.stderr
+        warning: method sys.stderr.read() used in tests
+        working correctly only with mocked stderr.
+
+        real stderr does not return EOF
+        """
         def __init__(self):
             self.fl=""
         def write(self,x):
             self.fl=x
         def read(self):
             return self.fl
-    STDERR=sys.stderr
-    sys.stderr=mockstderr()
+    STDERR = sys.stderr
+    sys.stderr = mockstderr()
 
 def teardown():
     sys.stderr = STDERR
+    #sys.stderr.write("teardown")
     feature = None
     text = None
 
@@ -155,7 +165,7 @@ Feature: Testing feature
     assert len(feature.description) == 3
     assert feature.scenarios[0].name == "Test_blue_sky"
     err = sys.stderr.read()
-    assert err == "Warning:Extra empty lines after feature definition"
+    assert err == "Warning: Extra empty lines before scenario definition"
 
 def test_one_step():
     """
@@ -239,3 +249,34 @@ Feature: Testing feature
     assert feature.description[0] == "In order to test software"
     assert feature.scenarios[0].name == "Test_blue_sky"
     assert feature.scenarios[0].steps[0] == "Given I am human"
+
+
+def test_two_scenarios():
+    """
+    processing of multiple scenarios 
+    """
+    text = \
+"""\
+Feature: Testing feature
+    In order to test software
+    As a developer
+    I want to use nice tools
+    
+    Scenario: Test_blue_sky
+        Given I am human
+        When I look at the sky
+        Then I see that it`s blue
+
+    Scenario: Test_green_grass
+        Given I am on the field
+        When I sit down
+        Then My pants become green because of grass\
+"""
+    feature = parser.parse(text)
+    #sys.stderr.write("")
+    assert feature.scenarios[0].name == "Test_blue_sky"
+    assert feature.scenarios[0].steps[2] == "Then I see that it`s blue"
+    assert feature.scenarios[1].name == "Test_green_grass"
+    assert feature.scenarios[1].steps[0] == "Given I am on the field"
+    assert feature.scenarios[1].steps[1] == "When I sit down"
+    assert feature.scenarios[1].steps[2] == "Then My pants become green because of grass"
