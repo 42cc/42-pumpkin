@@ -51,7 +51,7 @@ def parse(text):
             if line.strip() == "":
                 state = "scenario"
             elif line.startswith("        "):
-                feature = add_step(feature, line.strip())
+                feature.scenarios[-1].steps.append(line.strip())
     return feature
 
 
@@ -65,8 +65,8 @@ def indent_style(text):
     """
     import re
     lines = text.split("\n")
-    tabsymbol = ""                      #tabulation actually used in text
     if len(lines) > 1:
+        tabsymbol = ""                      #tabulation actually used in text
         for symbol in lines[1]:
             if re.match('\s', symbol):
                 tabsymbol += symbol     #for multi-spaces
@@ -114,13 +114,4 @@ def create_scenario(feature, line):
     if line.startswith("Scenario:"):
         scenario = Scenario(line[len("Scenario:"):].strip())
         feature.scenarios.append(scenario)
-    return feature
-
-
-def add_step(feature, line):
-    """append step definition to the scenarios of feature"""
-    if line.startswith("Given") \
-        or line.startswith("When") \
-        or line.startswith("Then"):
-        feature.scenarios[-1].steps.append(line)
     return feature
