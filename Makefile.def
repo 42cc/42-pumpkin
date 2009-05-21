@@ -9,8 +9,8 @@ proj=$(customer)-$(projshort)
 ver=$(shell cat .version)
 app=pumpkin
 
-BASE=/path/to/$(proj)
-SITE=/path/to/$(proj)/lib
+BASE=/home/meako/documents/Navch/dyplom/$(proj)
+SITE=/home/meako/documents/Navch/dyplom/$(proj)/lib
 PYTHONPATH=$(BASE):$(SITE)
 PYTHON=$(PYTHONPATH) python
 

@@ -5,13 +5,12 @@ import os
 
 #All those path manipulations are not mandatory.
 #Just made them for my personal convenience
-FILEDIR = os.path.abspath(os.path.dirname(__file__))
-PROJECT_ROOT = os.path.join(FILEDIR,"../../")
-sys.path.append(PROJECT_ROOT) #just in case (or for standalone coverage)
-sys.path.append(os.path.join(PROJECT_ROOT,"lib/tddspry/general"))
-sys.path.append(os.path.join(PROJECT_ROOT,"pumpkin/tests"))
-
-from mock import Mock
+#FILEDIR = os.path.abspath(os.path.dirname(__file__))
+#PROJECT_ROOT = os.path.join(FILEDIR,"../../")
+#sys.path.append(PROJECT_ROOT) #just in case (or for standalone coverage)
+#sys.path.append(os.path.join(PROJECT_ROOT,"lib/tddspry/general"))
+#sys.path.append(os.path.join(PROJECT_ROOT,"pumpkin/tests"))
+from tddspry.general.mock import Mock
 from pumpkin import parser
 STDERR = None   
 
