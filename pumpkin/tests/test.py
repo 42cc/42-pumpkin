@@ -102,22 +102,6 @@ Feature: Testing feature
     assert feature.description[1] == "As a developer"
     assert feature.description[2] == "I want to use nice tools"
 
-def test_bad_definition():
-    """bad feature definition"""
-    text = \
-"""\
-Feature: Testing feature
-    In order to test software
-    Not As a developer
-    We dont want to use nice tools\
-"""
-    feature = parser.parse(text)
-    assert feature.name == "Testing feature"
-    assert feature.description[0] == "In order to test software"
-    assert len(feature.description) == 1
-    assert sys.stderr.read() == \
-    "bad feature description on line: We dont want to use nice tools"
-
 def test_empty_line():
     """testing empty line processing, after the feature definition"""
     text = \
@@ -166,8 +150,6 @@ Feature: Testing feature
     feature = parser.parse(text)
     assert len(feature.description) == 3
     assert feature.scenarios[0].name == "Test_blue_sky"
-    err = sys.stderr.read()
-    assert err == "Warning: Extra empty lines before scenario definition"
 
 def test_one_step():
     """

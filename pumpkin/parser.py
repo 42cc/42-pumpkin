@@ -41,8 +41,6 @@ def parse(text):
                 feature = add_description(feature, line.strip())
         elif state == "scenario":
             if line.strip() == "":
-                sys.stderr.write(\
-                "Warning: Extra empty lines before scenario definition")
                 continue
             elif line.startswith("    "):
                 feature = create_scenario(feature, line.strip())
@@ -66,17 +64,17 @@ def indent_style(text):
     import re
     lines = text.split("\n")
     if len(lines) > 1:
-        tabsymbol = ""                      #tabulation actually used in text
+        indent = ""                      #tabulation actually used in text
         for symbol in lines[1]:
             if re.match('\s', symbol):
-                tabsymbol += symbol     #for multi-spaces
+                indent += symbol     #for multi-spaces
             else:
                 break
         indsymbol = "    "              #indentation symbol that we use
         newlines = []
         for line in lines:
-            line = re.sub('^'+tabsymbol, indsymbol, line)
-            line = re.sub('^'+indsymbol+tabsymbol, indsymbol+indsymbol, line)
+            line = re.sub('^'+indent, indsymbol, line)
+            line = re.sub('^'+indsymbol+indent, indsymbol+indsymbol, line)
             newlines.append(line)
         return newlines
     else:
@@ -96,16 +94,9 @@ def create_feature(line):
 
 def add_description(feature, line):
     """parse line for description definition"""
-
-    if line.startswith("In order") \
-    or line.startswith("As") \
-    or line.startswith("I want"):
-        if feature.description == None:
-            feature.description = []
-        feature.description.append(line.strip())
-    else:
-        sys.stderr.write("bad feature description on line: %s" % line)
-
+    if feature.description == None:
+        feature.description = []
+    feature.description.append(line.strip())
     return feature
 
 
