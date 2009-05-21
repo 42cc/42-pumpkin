@@ -40,9 +40,7 @@ def parse(text):
             elif line.startswith("    "):
                 feature = add_description(feature, line.strip())
         elif state == "scenario":
-            if line.strip() == "":
-                continue
-            elif line.startswith("    "):
+            if line.startswith("    "):
                 feature = create_scenario(feature, line.strip())
                 state = "step"
         elif state == "step":
