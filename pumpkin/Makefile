@@ -1,5 +1,5 @@
 # Copyright (C) 42 coffee cups
-
+ 
 include ../Makefile.def
 
 noseopt=-w .. --with-coverage --cover-package=$(app) --exe
@@ -10,7 +10,7 @@ modules=$(app)
 
 test:
 	PYTHONPATH=$(PYTHONPATH):. DJANGO_SETTINGS_MODULE=$(test_settings) nosetests  $(noseopt) $(modules)
-
+ 
 clean:
 	-rm *~*
 	-rm *.pyc
@@ -19,3 +19,4 @@ clean:
 ### compile-command:"make" ***
 ### tab-width: 2 ***
 ### End: ***
+

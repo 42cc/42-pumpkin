@@ -4,7 +4,10 @@ import sys
 import os
 from tddspry.general.mock import Mock
 from pumpkin import parser
+from pumpkin.pukorators import *
+from helpers import importCode
 STDERR = None   
+
 
 def setup():
     """functions that run before running tests"""
@@ -265,4 +268,24 @@ Feature: Testing feature
     assert feature.scenarios[2].steps[0] == "Given I am in the sandstorm"
     assert feature.scenarios[2].steps[1] == "When I jump up"
     assert feature.scenarios[2].steps[2] == "Then I jump in the sand"
+
+
+def test_table_add():
+    """
+    add decorated snippet of code to table compilance
+    """
+    code_def = """\
+from pumpkin.pukorators import *
+@given('I think that 2+2=5')
+def amiright():
+    assert 2+2 == 5
+
+@given('I think that 2+2=4')
+def imright():
+    assert 2+2 == 4\
+"""
+    assert table == {}
+    importCode(code_def, "code_def")
+    assert table["I think that 2+2=5"].__name__ == "amiright"
+    assert table["I think that 2+2=4"].__name__ == "imright"
 
