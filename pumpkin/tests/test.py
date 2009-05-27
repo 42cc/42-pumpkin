@@ -3,8 +3,7 @@
 import sys
 import os
 from tddspry.general.mock import Mock
-from pumpkin import parser, runner
-
+from pumpkin import parser
 STDERR = None   
 
 def setup():
@@ -266,56 +265,4 @@ Feature: Testing feature
     assert feature.scenarios[2].steps[0] == "Given I am in the sandstorm"
     assert feature.scenarios[2].steps[1] == "When I jump up"
     assert feature.scenarios[2].steps[2] == "Then I jump in the sand"
-
-def test_code_convert():
-    """
-    convert step definitions to code that is able to run
-    """
-    code_def = """\
-@given('I think that 2+2=4')
-def am_i_right():
-    assert 2+2 == 4\
-"""
-    code_must="""\
-# -*- coding: utf-8 -*-
-from pukorators import given
-def run(feature):
-    @given('I think that 2+2=4')
-    def am_i_right():
-        assert 2+2 == 4
-    am_i_right()\
-"""
-    
-    code = runner.makeCode(code_def)
-    assert code == code_must
-
-
-def _test_decorate_fail():
-    """
-    NOT WORKING WITH IT FOR NOW
-    run py code with @given decorator,
-    proper code definition bad bad functionality and watch it fails
-    decorator should handle this
-    """
-
-    code_ftr = """\
-Feature: Testing feature
-    I want to use nice tools
-
-    Scenario: test math
-        Given I think that 2+2=5\
-"""
-    code_def = """\
-@given('I think that 2+2=5')
-def amiright():
-    assert 2+2 == 5\
-"""
-    #not handling variables or regexps in step definitions for now
-    feature = parser.parse(code_ftr)
-    lin = runner.cutstatements(feature.scenarios[0].steps[0])
-    assert lin == "I think that 2+2=5"
-    code = runner.makeCode(code_ftr)
-    print code
-    runner.run(feature, code)
-
 
