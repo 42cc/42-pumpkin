@@ -33,6 +33,10 @@ def setup():
 def teardown():
     """runs after tests"""
     sys.stderr = STDERR
+    code_def = None
+    code_defn = None
+    table = None
+    mtable = None
 
 def test_empty():
     """parse with empty text as parameter"""
@@ -286,16 +290,17 @@ def imright():
     assert 2+2 == 4\
 """
     assert table == {}
-    importCode(code_def, "code_def")
+    importCode(code_def, "code_defn")
     assert table["I think that 2+2=5"].__name__ == "amiright"
     assert table["I think that 2+2=4"].__name__ == "imright"
 
 def test_matching_functions():
     """
+    Simple regular expression without special characters
+
     test that step definition in table has a matching
     description in features and matches are added to the new table
 
-    Simple regular expression without special characters
     """
     code_def = """\
 from pumpkin.pukorators import *
@@ -312,24 +317,23 @@ Feature: Testing feature
         Given I think that 2 plus 2 = 5\
 """
     feature = parser.parse(code_ftr)
-    importCode(code_def, "code_def")
-    ctable = runner.make_ctable(feature, table)
-    assert ctable["Given I think that 2 plus 2 = 5"].__name__ == "amiright"
-    assert len(ctable) == 1
-    importCode("","code_def")
+    importCode(code_def, "code_defn")
+    mtable = runner.make_mtable(feature, table)
+    assert mtable["Given I think that 2 plus 2 = 5"].__name__ == "amiright"
+    assert len(mtable) == 1
+    importCode("","code_defn")
 
 def test_matching_functions_regexps():
     """
+    Using regular expressions & special characters
     test that step definition in table has a matching
     description in features and matches are added to the new table
-
-     Using regular expressions & special characters
     """
     code_def = """\
 from pumpkin.pukorators import *
-@given(r'I think that \d pluz \d = \d')
+@given(r'I think that \d [+] \d = \d')
 def amiright_again():
-    assert 2+2 == 6
+    assert 2 + 2 == 5
 """
 
     code_ftr = """\
@@ -337,23 +341,113 @@ Feature: Testing feature
     I want to use nice tools
 
     Scenario: test math
-        Given I think that 2 pluz 2 = 6"""
+        Given I think that 2 + 2 = 5"""
 
     feature = parser.parse(code_ftr)
-    importCode(code_def, "code_def")
-    ctable = runner.make_ctable(feature, table)
-    assert ctable["Given I think that 2 pluz 2 = 6"].__name__ == "amiright_again"
-    assert len(ctable) == 1
+    importCode(code_def, "code_defn")
+    mtable = runner.make_mtable(feature, table)
+    assert mtable["Given I think that 2 + 2 = 5"].__name__ == "amiright_again"
+    assert len(mtable) == 1
     
-def test_matching_params():
+def test_multi_steps():        
+    """
+    test with few step definitions and code statements
+
+    """
+
+    code_ftr="""\
+Feature: Testing feature
+    I want to use nice tools
+
+    Scenario: test math
+        Given I think that 2 + 2 = 5
+        Then I should be wrong
+        """
+
+    code_def = """\
+from pumpkin.pukorators import *
+@given(r'I think that \d [+] \d = \d')
+def amiright_again():
+    assert 2 + 2 == 5
+
+@then(r'I should be wrong')
+def imwrong():
+    assert 2 + 2 == 4
+"""
+    feature = parser.parse(code_ftr)
+    importCode(code_def, "code_defn")
+    mtable = runner.make_mtable(feature, table)
+    assert mtable["Given I think that 2 + 2 = 5"].__name__ == "amiright_again"
+    assert mtable["Then I should be wrong"].__name__ == "imwrong"
+    assert len(mtable) == 2
+
+
+def test_multi_wrong():        
+    """
+    test with some wrong step definitions and code statements
+
+    later - should add user-notification about undefined steps
+    """
+    code_ftr= """\
+Feature: Testing feature
+    I want to use nice tools
+
+    Scenario: test math
+        Given I think that 2 + 2 = 5
+        Then Khavr should buy me a calculator
+        """
+
+    code_def = """\
+from pumpkin.pukorators import *
+@given(r'I think that \d [+] \d = \d')
+def amiright_again():
+    assert 2 + 2 == 5
+"""
+    feature = parser.parse(code_ftr)
+    importCode(code_def, "code_defn")
+    mtable = runner.make_mtable(feature, table)
+    assert mtable["Given I think that 2 + 2 = 5"].__name__ == "amiright_again"
+    assert len(mtable) == 1
+
+
+def test_runner():
+    """
+    test runner with correct functions and scenarios
+    """
+    code_ftr= """\
+Feature: Testing feature
+    I want to use nice tools
+
+    Scenario: test math
+        Given I think that 2 + 2 = 4
+        """
+
+    code_def = """\
+from pumpkin.pukorators import *
+@given(r'I think that \d [+] \d = \d')
+def imright():
+    assert 2 + 2 == 4
+"""
+
+
+    feature = parser.parse(code_ftr)
+    importCode(code_def, "code_defn")
+    mtable = runner.make_mtable(feature, table)
+    assert mtable["Given I think that 2 + 2 = 4"].__name__ == "imright"
+    assert len(mtable) == 1
+    runner.run_tests(mtable)
+    
+    
+
+def _test_matching_params():
     """
     now test for using variables as parameters for decorators
     """
     code_def = """\
 from pumpkin.pukorators import *
-@given(r'I think that \d pluz \d = \d')
+@given(r'I think that (?P<var1>\d) [+] (?P<var2>\d) = (?P<var3>\d)')
 def amiright_again():
-    assert 2+2 == 6
+    assert var1 + var2 == var3
 """
 
     code_ftr = """\
@@ -361,10 +455,10 @@ Feature: Testing feature
     I want to use nice tools
 
     Scenario: test math
-        Given I think that 2 pluz 2 = 6"""
+        Given I think that 2 + 2 = 5"""
 
     feature = parser.parse(code_ftr)
-    importCode(code_def, "code_def")
-    ctable = runner.make_ctable(feature, table)
-    assert ctable["Given I think that 2 pluz 2 = 6"].__name__ == "amiright_again"
-    assert len(ctable) == 1
+    importCode(code_def, "code_defn")
+    mtable = runner.make_mtable(feature, table)
+    assert mtable["Given I think that 2 + 2 = 5"].__name__ == "amiright_again"
+    assert len(mtable) == 1

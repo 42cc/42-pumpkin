@@ -3,13 +3,8 @@ table = {}
 
 def given(regexp):
     def _dec(function):
-        def wrapper(*args, **kwargs):
-            pass
-        wrapper.__name__ = function.__name__
-        wrapper.__doc__ = function.__doc__
-        wrapper.__dict__.update(function.__dict__)
-        table.update({regexp:wrapper})
-        return wrapper
+        table.update({regexp:function})
+        return function
     return _dec
 
 then = given
