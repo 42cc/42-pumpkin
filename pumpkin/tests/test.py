@@ -4,6 +4,7 @@ import sys
 import os
 from tddspry.general.mock import Mock
 from pumpkin import parser
+from pumpkin import runner
 from pumpkin.pukorators import *
 from helpers import importCode
 STDERR = None   
@@ -270,7 +271,7 @@ Feature: Testing feature
     assert feature.scenarios[2].steps[2] == "Then I jump in the sand"
 
 
-def test_table_add():
+def _test_table_add():
     """
     add decorated snippet of code to table compilance
     """
@@ -280,7 +281,7 @@ from pumpkin.pukorators import *
 def amiright():
     assert 2+2 == 5
 
-@given('I think that 2+2=4')
+@then('I think that 2+2=4')
 def imright():
     assert 2+2 == 4\
 """
@@ -289,3 +290,81 @@ def imright():
     assert table["I think that 2+2=5"].__name__ == "amiright"
     assert table["I think that 2+2=4"].__name__ == "imright"
 
+def test_matching_functions():
+    """
+    test that step definition in table has a matching
+    description in features and matches are added to the new table
+
+    Simple regular expression without special characters
+    """
+    code_def = """\
+from pumpkin.pukorators import *
+@given('I think that 2 plus 2 = 5')
+def amiright():
+    assert 2+2 == 5
+"""
+
+    code_ftr = """\
+Feature: Testing feature
+    I want to use nice tools
+
+    Scenario: test math
+        Given I think that 2 plus 2 = 5\
+"""
+    feature = parser.parse(code_ftr)
+    importCode(code_def, "code_def")
+    ctable = runner.make_ctable(feature, table)
+    assert ctable["Given I think that 2 plus 2 = 5"].__name__ == "amiright"
+    assert len(ctable) == 1
+    importCode("","code_def")
+
+def test_matching_functions_regexps():
+    """
+    test that step definition in table has a matching
+    description in features and matches are added to the new table
+
+     Using regular expressions & special characters
+    """
+    code_def = """\
+from pumpkin.pukorators import *
+@given(r'I think that \d pluz \d = \d')
+def amiright_again():
+    assert 2+2 == 6
+"""
+
+    code_ftr = """\
+Feature: Testing feature
+    I want to use nice tools
+
+    Scenario: test math
+        Given I think that 2 pluz 2 = 6"""
+
+    feature = parser.parse(code_ftr)
+    importCode(code_def, "code_def")
+    ctable = runner.make_ctable(feature, table)
+    assert ctable["Given I think that 2 pluz 2 = 6"].__name__ == "amiright_again"
+    assert len(ctable) == 1
+    
+def test_matching_params():
+    """
+    now test for using variables as parameters for decorators
+    """
+    code_def = """\
+from pumpkin.pukorators import *
+@given(r'I think that \d pluz \d = \d')
+def amiright_again():
+    assert 2+2 == 6
+"""
+
+    code_ftr = """\
+Feature: Testing feature
+    I want to use nice tools
+
+    Scenario: test math
+        Given I think that 2 pluz 2 = 6"""
+
+    feature = parser.parse(code_ftr)
+    importCode(code_def, "code_def")
+    ctable = runner.make_ctable(feature, table)
+    assert ctable["Given I think that 2 pluz 2 = 6"].__name__ == "amiright_again"
+    assert len(ctable) == 1
