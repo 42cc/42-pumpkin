@@ -438,6 +438,33 @@ def imright():
     runner.run_tests(mtable)
     
     
+def test_runner_fail():
+    """
+    test runner with failing functions 
+    """
+    code_ftr= """\
+Feature: Testing feature
+    I want to use nice tools
+
+    Scenario: test math
+        Given I think that 2 + 2 = 5
+        """
+
+    code_def = """\
+from pumpkin.pukorators import *
+@given(r'I think that \d [+] \d = \d')
+def amiright():
+    assert 2 + 2 == 5
+"""
+
+
+    feature = parser.parse(code_ftr)
+    importCode(code_def, "code_defn")
+    mtable = runner.make_mtable(feature, table)
+    assert mtable["Given I think that 2 + 2 = 5"].__name__ == "amiright"
+    assert len(mtable) == 1
+    runner.run_tests(mtable)
+
 
 def _test_matching_params():
     """
@@ -462,3 +489,4 @@ Feature: Testing feature
     mtable = runner.make_mtable(feature, table)
     assert mtable["Given I think that 2 + 2 = 5"].__name__ == "amiright_again"
     assert len(mtable) == 1
+    runner.run_tests(mtable)
