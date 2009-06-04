@@ -2,41 +2,23 @@
 """tests for pumpkin app"""
 import sys
 import os
-from tddspry.general.mock import Mock
 from pumpkin import parser
 from pumpkin import runner
 from pumpkin.pukorators import *
-from helpers import importCode
+from helpers import importCode, Mockstderr
 STDERR = None   
 
-class TestPumpkin:
+class TestParser:
+    """pumpkin Parser module takes gherkin-marked text and returns feature obj"""
+
     def setUp(self):
-        """functions that run before running tests"""
-
-        class Mockstderr(Mock):
-            """
-            mocking sys.stderr
-            warning: method sys.stderr.read() used in tests
-            working correctly only with mocked stderr.
-
-            real stderr does not return EOF
-            """
-            def __init__(self):
-                self.text = ""
-            def write(self, err):
-                self.text = err
-            def read(self):
-                return self.text
+        """functions that run before running each test"""
         STDERR = sys.stderr
         sys.stderr = Mockstderr()
 
     def tearDown(self):
         """runs after tests"""
         sys.stderr = STDERR
-        code_def = None
-        code_defn = None
-        table = None
-        mtable = None
 
     def test_empty(self):
         """parse with empty text as parameter"""
@@ -275,7 +257,11 @@ Feature: Testing feature
         assert feature.scenarios[2].steps[2] == "Then I jump in the sand"
 
 
-    def _test_table_add(self):
+class testDecorators:
+    """pumpkin decorators (pukorators). Adding their params into regexp-table and
+    wrapping functions in try-except statements"""
+
+    def test_table_add(self):
         """
         add decorated snippet of code to table compilance
         """
@@ -289,156 +275,25 @@ def amiright():
 def imright():
     assert 2+2 == 4\
     """
-        assert table == {}
         importCode(code_def, "code_defn")
         assert table["I think that 2+2=5"].__name__ == "amiright"
         assert table["I think that 2+2=4"].__name__ == "imright"
 
-    def test_matching_functions(self):
-        """
-        Simple regular expression without special characters
+class testRunner:        
+    """runner. Runs tests defined in definitions, against feature obj"""
 
-        test that step definition in table has a matching
-        description in features and matches are added to the new table
+    def setUp(self):
+        """functions that run before running each test"""
+        STDERR = sys.stderr
+        sys.stderr = Mockstderr()
 
-        """
-        code_def = """\
-from pumpkin.pukorators import *
-@given('I think that 2 plus 2 = 5')
-def amiright():
-    assert 2+2 == 5
-"""
+    def tearDown(self):
+        """runs after tests"""
+        sys.stderr = STDERR
+        code_def = None
+        code_defn = None
+        table = None
 
-        code_ftr = """\
-Feature: Testing feature
-    I want to use nice tools
-
-    Scenario: test math
-        Given I think that 2 plus 2 = 5\
-    """
-        feature = parser.parse(code_ftr)
-        importCode(code_def, "code_defn")
-        mtable = runner.make_mtable(feature, table)
-        assert mtable["Given I think that 2 plus 2 = 5"].__name__ == "amiright"
-        assert len(mtable) == 1
-        importCode("","code_defn")
-
-    def test_matching_functions_regexps(self):
-        """
-        Using regular expressions & special characters
-        test that step definition in table has a matching
-        description in features and matches are added to the new table
-        """
-        code_def = """\
-from pumpkin.pukorators import *
-@given(r'I think that \d [+] \d = \d')
-def amiright_again():
-    assert 2 + 2 == 5
-"""
-
-        code_ftr = """\
-Feature: Testing feature
-    I want to use nice tools
-
-    Scenario: test math
-        Given I think that 2 + 2 = 5"""
-
-        feature = parser.parse(code_ftr)
-        importCode(code_def, "code_defn")
-        mtable = runner.make_mtable(feature, table)
-        assert mtable["Given I think that 2 + 2 = 5"].__name__ == "amiright_again"
-        assert len(mtable) == 1
-        
-    def test_multi_steps(self):        
-        """
-        test with few step definitions and code statements
-
-        """
-
-        code_ftr="""\
-Feature: Testing feature
-    I want to use nice tools
-
-    Scenario: test math
-        Given I think that 2 + 2 = 5
-        Then I should be wrong
-"""
-
-        code_def = """\
-from pumpkin.pukorators import *
-@given(r'I think that \d [+] \d = \d')
-def amiright_again():
-    assert 2 + 2 == 5
-
-@then(r'I should be wrong')
-def imwrong():
-    assert 2 + 2 == 4\
-"""
-        feature = parser.parse(code_ftr)
-        importCode(code_def, "code_defn")
-        mtable = runner.make_mtable(feature, table)
-        assert mtable["Given I think that 2 + 2 = 5"].__name__ == "amiright_again"
-        assert mtable["Then I should be wrong"].__name__ == "imwrong"
-        assert len(mtable) == 2
-
-
-    def test_multi_wrong(self):        
-        """
-        test with some wrong step definitions and code statements
-
-        later - should add user-notification about undefined steps
-        """
-        code_ftr= """\
-Feature: Testing feature
-    I want to use nice tools
-
-    Scenario: test math
-        Given I think that 2 + 2 = 5
-        Then Khavr should buy me a calculator\
-"""
-
-        code_def = """\
-from pumpkin.pukorators import *
-@given(r'I think that \d [+] \d = \d')
-def amiright_again():
-    assert 2 + 2 == 5\
-"""
-        feature = parser.parse(code_ftr)
-        importCode(code_def, "code_defn")
-        mtable = runner.make_mtable(feature, table)
-        assert mtable["Given I think that 2 + 2 = 5"].__name__ == "amiright_again"
-        assert len(mtable) == 1
-
-
-    def test_runner(self):
-        """
-        test runner with correct functions and scenarios
-        """
-        code_ftr= """\
-Feature: Testing feature
-    I want to use nice tools
-
-    Scenario: test math
-        Given I think that 2 + 2 = 4
-            """
-
-        code_def = """\
-from pumpkin.pukorators import *
-@given(r'I think that \d [+] \d = \d')
-def imright():
-    assert 2 + 2 == 4
-"""
-
-
-        feature = parser.parse(code_ftr)
-        importCode(code_def, "code_defn")
-        mtable = runner.make_mtable(feature, table)
-        assert mtable["Given I think that 2 + 2 = 4"].__name__ == "imright"
-        assert len(mtable) == 1
-        runner.run_tests(mtable)
-        assert sys.stderr.read() == ""
-        
-        
     def test_runner_fail(self):
         """
         test runner with failing functions 
@@ -461,21 +316,28 @@ def amiright():
 
         feature = parser.parse(code_ftr)
         importCode(code_def, "code_defn")
-        mtable = runner.make_mtable(feature, table)
-        assert mtable["Given I think that 2 + 2 = 5"].__name__ == "amiright"
-        assert len(mtable) == 1
-        runner.run_tests(mtable)
+        runner.run(feature,table)
+        assert sys.stderr.read() == "amiright failed"
 
 
-    def _test_matching_params(self):
+    def test_matching_params(self):
         """
         now test for using variables as parameters for decorators
         """
         code_def = """\
 from pumpkin.pukorators import *
-@given(r'I think that (?P<var1>\d) [+] (?P<var2>\d) = (?P<var3>\d)')
-def amiright_again():
-    assert var1 + var2 == var3
+@given(r'I think : (?P<var1>\d) [+] (?P<var2>\d) = (?P<var3>\d)')
+def amiright_again(var1,var2,var3):
+    assert int(var1) + int(var2) == int(var3)
+
+@when(r'answer is (?P<digit>\d), then it sounds "(?P<word>.*)"')
+def digit_is_word(digit,word):
+    if digit == "1":
+        assert word == "one"
+    elif digit == "5":
+        assert word == "five"
+    else:
+        raise Exception
 """
 
         code_ftr = """\
@@ -483,11 +345,11 @@ Feature: Testing feature
     I want to use nice tools
 
     Scenario: test math
-        Given I think that 2 + 2 = 5"""
+        Given I think : 3 + 2 = 5
+        When answer is 5, then it sounds "five"\
+"""
 
         feature = parser.parse(code_ftr)
         importCode(code_def, "code_defn")
-        mtable = runner.make_mtable(feature, table)
-        assert mtable["Given I think that 2 + 2 = 5"].__name__ == "amiright_again"
-        assert len(mtable) == 1
-        runner.run_tests(mtable)
+        runner.run(feature,table)
+        assert sys.stderr.read() == ""

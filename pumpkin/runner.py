@@ -1,26 +1,23 @@
 # -*- coding: utf-8 -*-
 import re
-def make_mtable(feature, table):        
+def run(feature, table):        
     """
     make matches of feature-definitions and regexp-func
     table returned from pukorators
     """
-    mtable = {}
     for regexp in table:
         #print "regexp " + regexp
         for scenario in feature.scenarios:
             for step_def in scenario.steps:
                 #print "step" + strip_statements(step_def)
                 if re.match(regexp, strip_statements(step_def)):
-                    mtable.update({step_def:table[regexp]})
-    #print mtable
-    return mtable
+                    params = re.match(regexp, strip_statements(step_def)).groups()
+                    func = table[regexp]
+                    if len(params) > 0:
+                        func(*params)
+                    else:
+                        func()
 
-def run_tests(mtable):
-    """run the tests provided by table of matches"""
-    for step in mtable:
-        func =  mtable[step]
-        func()
 
 
 def strip_statements(line):
