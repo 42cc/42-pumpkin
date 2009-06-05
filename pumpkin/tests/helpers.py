@@ -9,7 +9,8 @@ def importCode(code, name):
     exec code in module.__dict__
     return module
 
-class Mockstderr(Mock):
+
+class Mockstd(Mock):
     """
     mocking sys.stderr
     warning: method sys.stderr.read() used in tests
@@ -20,6 +21,6 @@ class Mockstderr(Mock):
     def __init__(self):
         self.text = ""
     def write(self, err):
-        self.text = err
+        self.text += err
     def read(self):
         return self.text

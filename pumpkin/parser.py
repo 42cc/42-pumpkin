@@ -65,10 +65,10 @@ def indent_style(text):
         indent = ""                      #tabulation actually used in text
         for symbol in lines[1]:
             if re.match('\s', symbol):
-                indent += symbol     #for multi-spaces
+                indent += symbol         #for multi-spaces
             else:
                 break
-        indsymbol = "    "              #indentation symbol that we use
+        indsymbol = "    "               #indentation symbol that we use
         newlines = []
         for line in lines:
             line = re.sub('^'+indent, indsymbol, line)

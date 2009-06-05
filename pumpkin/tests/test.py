@@ -5,7 +5,7 @@ import os
 from pumpkin import parser
 from pumpkin import runner
 from pumpkin.pukorators import *
-from helpers import importCode, Mockstderr
+from helpers import importCode, Mockstd
 STDERR = None   
 
 class TestParser:
@@ -14,7 +14,7 @@ class TestParser:
     def setUp(self):
         """functions that run before running each test"""
         STDERR = sys.stderr
-        sys.stderr = Mockstderr()
+        sys.stderr = Mockstd()
 
     def tearDown(self):
         """runs after tests"""
@@ -257,7 +257,7 @@ Feature: Testing feature
         assert feature.scenarios[2].steps[2] == "Then I jump in the sand"
 
 
-class testDecorators:
+class TestDecorators:
     """pumpkin decorators (pukorators). Adding their params into regexp-table and
     wrapping functions in try-except statements"""
 
@@ -279,13 +279,13 @@ def imright():
         assert table["I think that 2+2=5"].__name__ == "amiright"
         assert table["I think that 2+2=4"].__name__ == "imright"
 
-class testRunner:        
+class TestRunner:        
     """runner. Runs tests defined in definitions, against feature obj"""
 
     def setUp(self):
         """functions that run before running each test"""
         STDERR = sys.stderr
-        sys.stderr = Mockstderr()
+        sys.stderr = Mockstd()
 
     def tearDown(self):
         """runs after tests"""
