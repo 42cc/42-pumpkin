@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 """pumpkin core module, which runs everything"""
-
+import os
+import sys
+from parser import parse
+from pukorators import table
+from runner import run
 #from sys.argv should take the filename
 #may be good to take abspath from it
 #and also sys.path manipulations
@@ -20,9 +24,12 @@ def readfile(filename):
 #then parser takes that file and returns feature
 
 def find_and_import(filename):
-    if os.path.isdir("./step_definitions/") #file dir+step_defs
-        sys.path.append
+    modulename = filename.split("/")[-1].split(".")[-2]
+    if os.path.isdir("./step_definitions/"):
+        sys.path.append("./step_definitions/")
+        __import__(str(modulename))
 
 
-
+#feature = parse(readfile(filename))
+#run(feature,table)
 

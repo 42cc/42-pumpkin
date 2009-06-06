@@ -11,44 +11,48 @@ STDERR = None
 
 ft_text = """\
 Feature: Work
-In order to get Pumpkin working
-As it`s developer
-I want to test it
+    In order to get Pumpkin working
+    As it`s developer
+    I want to test it
 
-Scenario: Test math
-    Given i add 3759 and 3243
-    Then result should be 7002
+    Scenario: Test math
+        Given I add 3759 and 3243
+        Then result should be 7002
 """
 df_text = """\
 from pumpkin.pukorators import *
-result = None
-@given(r'I add (?P<num1\d> and (?P<num2>\d)
+@given(r'I add (?P<num1>\d*) and (?P<num2>\d*)')
 def add(num1,num2):
-result = num1 + num2
+    global RESULTS
+    RESULTS = int(num1) + int(num2)
 
-@then('result should be (?P<res>\d)
+@then(r'result should be (?P<res>\d*)')
 def result(res):
-assert res == result\
+    assert int(res) == RESULTS
 """
+defdir = "./step_definitions/"
+
 
 def setup():
+    """creatig feature and def. files"""
     ft_file = open("testing.feature", 'w')
     for line in ft_text:
         ft_file.write(line)
     ft_file.close()
 
-    if not os.path.isdir("./step_definitions/"):
-        os.mkdir("./step_definitions/")
-    df_file = open("./step_definitions/testing.py", 'w')
+    if not os.path.isdir(defdir):
+        os.mkdir(defdir)
+    df_file = open(defdir+"testing.py", 'w')
     for line in df_text:
         df_file.write(line)
     df_file.close()
 
 def teardown():
-    '''removing feature file'''
+    """removing feature-files"""
     os.remove("testing.feature")
-    os.remove("./step_definitions/testing.py")
-    os.rmdir("./step_definitions/")
+    for file in os.listdir(defdir):
+        os.remove(defdir+file)
+    os.rmdir(defdir)
 
 class TestFileProcessing:
     """test processing of real files"""
@@ -60,11 +64,16 @@ class TestFileProcessing:
         text = core.readfile(filename)
         assert text == ft_text
 
-    def _test_def_file(self):
+    def test_def_file(self):
         """takes feature-file, and finds it`s definitions to run"""
         filename = "testing.feature"
-        assert table == {} 
+        core.find_and_import(filename)
+        assert table[r'I add (?P<num1>\d*) and (?P<num2>\d*)'].__name__ == "add" 
+        assert table['result should be (?P<res>\d*)'].__name__ =="result"
 
-    def test_nothing(self):
-        pass
-
+    def test_full_path(self):
+        filename = "/home/meako/documents/Navch/dyplom/42-pumpkin/pumpkin/tests/testing.feature"
+        text = core.readfile(filename)
+        core.find_and_import(filename)
+        assert table[r'I add (?P<num1>\d*) and (?P<num2>\d*)'].__name__ == "add" 
+        assert table['result should be (?P<res>\d*)'].__name__ =="result"
