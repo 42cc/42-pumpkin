@@ -30,12 +30,12 @@ def add(num1,num2):
 def result(res):
     assert int(res) == RESULTS
 """
-defdir = "./step_definitions/"
-
-
+filedir = os.path.abspath(os.path.dirname(__file__))
+defdir = os.path.join(filedir, "./step_definitions/")
+featurefile = os.path.join(filedir, "testing.feature")
 def setup():
     """creatig feature and def. files"""
-    ft_file = open("testing.feature", 'w')
+    ft_file = open(featurefile, 'w')
     for line in ft_text:
         ft_file.write(line)
     ft_file.close()
@@ -47,33 +47,24 @@ def setup():
         df_file.write(line)
     df_file.close()
 
-def teardown():
+def _teardown():
     """removing feature-files"""
-    os.remove("testing.feature")
+    os.remove(featurefile)
     for file in os.listdir(defdir):
         os.remove(defdir+file)
     os.rmdir(defdir)
 
 class TestFileProcessing:
     """test processing of real files"""
-        
 
     def test_featurefile(self):
-        """test function that takes filename and returns text from it"""
-        filename = "testing.feature"
-        text = core.readfile(filename)
+        """ test function that takes filename and returns text from it """
+        text = core.readfile(featurefile)
         assert text == ft_text
 
     def test_def_file(self):
-        """takes feature-file, and finds it`s definitions to run"""
-        filename = "testing.feature"
-        core.find_and_import(filename)
+        """ takes feature-file, and finds it`s definitions to run """
+        core.find_and_import(featurefile)
         assert table[r'I add (?P<num1>\d*) and (?P<num2>\d*)'].__name__ == "add" 
         assert table['result should be (?P<res>\d*)'].__name__ =="result"
 
-    def test_full_path(self):
-        filename = "/home/meako/documents/Navch/dyplom/42-pumpkin/pumpkin/tests/testing.feature"
-        text = core.readfile(filename)
-        core.find_and_import(filename)
-        assert table[r'I add (?P<num1>\d*) and (?P<num2>\d*)'].__name__ == "add" 
-        assert table['result should be (?P<res>\d*)'].__name__ =="result"

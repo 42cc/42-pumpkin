@@ -7,9 +7,6 @@ from pukorators import table
 from runner import run
 #from sys.argv should take the filename
 #may be good to take abspath from it
-#and also sys.path manipulations
-#also filename is made of "filename.feature"
-#but step.defs are imported as "filename.py"
 
 def readfile(filename):        
     """
@@ -24,9 +21,11 @@ def readfile(filename):
 #then parser takes that file and returns feature
 
 def find_and_import(filename):
+    filedir = os.path.dirname(filename)
+    moduledir = os.path.join(filedir,'step_definitions/')
     modulename = filename.split("/")[-1].split(".")[-2]
-    if os.path.isdir("./step_definitions/"):
-        sys.path.append("./step_definitions/")
+    if os.path.isdir(moduledir):
+        sys.path.append(moduledir)
         __import__(str(modulename))
 
 
