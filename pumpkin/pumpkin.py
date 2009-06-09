@@ -2,11 +2,11 @@ import sys
 from parser import parse
 from pukorators import *
 from runner import run
-from core import readfile, find_and_import
+from core import find_and_import
 
 def process(filename):
-    ft_text = readfile(filename)
-    feature = parse(ft_text)
+    feature_text = file(filename).read()
+    feature = parse(feature_text)
     find_and_import(filename)
     run(feature,table)
 

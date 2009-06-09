@@ -65,11 +65,6 @@ class TestFileProcessing:
         """runs after tests"""
         sys.stderr = STDERR
 
-    def test_featurefile(self):
-        """ test function that takes filename and returns text from it """
-        text = core.readfile(featurefile)
-        assert text == ft_text
-
     def test_def_file(self):
         """ takes feature-file, and finds it`s definitions to run """
         core.find_and_import(featurefile)
@@ -101,7 +96,6 @@ class TestPumpkinModule:
         sys.argv = ['pumpkin.py']
         import pumpkin.pumpkin
         assert sys.stderr.read() == "no file specified\n"
-
 
     def test_processing(self):
         sys.argv = ['pumpkin.py',featurefile]

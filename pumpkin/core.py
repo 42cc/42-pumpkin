@@ -6,15 +6,6 @@ from parser import parse
 from pukorators import table
 from runner import run
 
-def readfile(filename):        
-    """
-    read a file and return text from it
-    """
-    ft_text = ""
-    ft_file = file(filename)
-    for line in ft_file.readlines():
-        ft_text += line
-    return ft_text
 
 
 def find_and_import(filename):

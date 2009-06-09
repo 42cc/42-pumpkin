@@ -7,11 +7,11 @@ def go_google():
 
 @when(r'I search for "(?P<query>.*)"')
 def search_for_query(query):
-  formvalue(1, 'q', query)
-  submit()
-  code('200')
+    formvalue(1, 'q', query)
+    submit()
+    code('200')
 
 @then(r'I should see a link to "(?P<expected_url>.*)"')
 def should_have_link(expected_url):
-  find('<a.*href="http://%s/"' % expected_url)
+    find('<a.*href="http://%s/"' % expected_url)
 
