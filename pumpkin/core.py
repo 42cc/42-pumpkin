@@ -21,7 +21,8 @@ def find_and_import(filename):
     """find step_definitions file and import it, if exists"""
     filedir = os.path.dirname(filename)
     moduledir = os.path.join(filedir,'step_definitions/')
-    modulename = filename.split("/")[-1].split(".")[-2]
+    modulename = filename.split("/")[-1].split(".")[-2]  #yea, scary. Finding
+                #the last element of the path, and cutting out file-extension
     if os.path.isdir(moduledir):
         sys.path.append(moduledir)
         try:

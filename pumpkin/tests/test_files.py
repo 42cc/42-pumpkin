@@ -106,4 +106,5 @@ class TestPumpkinModule:
     def test_processing(self):
         sys.argv = ['pumpkin.py',featurefile]
         import pumpkin.pumpkin
+        assert sys.stderr.read() == ""
 

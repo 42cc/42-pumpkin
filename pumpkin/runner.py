@@ -12,7 +12,8 @@ def run(feature, table):
     for scenario in feature.scenarios:
         print "\n    Scenario: " + scenario.name
         for step_def in scenario.steps:
-            sys.stdout.write("         %s    |   " % step_def) # because we dont want newline at the end
+            sys.stdout.write("\t%s\t|\t" % step_def)    #using stduot 
+#because we dont want newline at the end
             matched = False
             for regexp in table:
                 match = re.match(regexp, strip_statements(step_def))
@@ -20,10 +21,7 @@ def run(feature, table):
                     matched = True
                     params = match.groups()
                     func = table[regexp]
-                    if len(params) > 0:
-                        func(*params)
-                    else:
-                        func()
+                    func(*params)
             if not matched:
                 print "Pending (no matching function)"
     
