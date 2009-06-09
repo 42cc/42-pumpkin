@@ -1,7 +1,7 @@
-Feature: Work
-	In order to get Pumpkin working
+Feature: First Example Feature
+	In order to get show you what is pumpkin
 	As it`s developer
-	I want to test it
+	I want to give you some example4
 
 	Scenario: Give pumpkin some file to process
 		Given I Have pumpkin app

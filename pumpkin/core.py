@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
-"""pumpkin core module, which runs everything"""
+"""pumpkin module, that works with files"""
 import os
 import sys
 from parser import parse
 from pukorators import table
 from runner import run
-#from sys.argv should take the filename
-#may be good to take abspath from it
 
 def readfile(filename):        
     """
@@ -18,17 +16,21 @@ def readfile(filename):
         ft_text += line
     return ft_text
 
-#then parser takes that file and returns feature
 
 def find_and_import(filename):
+    """find step_definitions file and import it, if exists"""
     filedir = os.path.dirname(filename)
     moduledir = os.path.join(filedir,'step_definitions/')
     modulename = filename.split("/")[-1].split(".")[-2]
     if os.path.isdir(moduledir):
         sys.path.append(moduledir)
-        __import__(str(modulename))
+        try:
+            __import__(str(modulename))
+        except:
+            sys.stderr.write("No matching definitions file for Feature: %s\n" % modulename)
+    else:
+        sys.stderr.write("Can`t find step_definitions directory\n")
 
 
-#feature = parse(readfile(filename))
-#run(feature,table)
+
 

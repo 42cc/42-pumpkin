@@ -7,8 +7,7 @@ from pumpkin import runner
 from pumpkin import core
 from pumpkin.pukorators import *
 from helpers import importCode, Mockstd
-STDERR = None   
-
+STDERR = None
 ft_text = """\
 Feature: Work
     In order to get Pumpkin working
@@ -47,7 +46,7 @@ def setup():
         df_file.write(line)
     df_file.close()
 
-def _teardown():
+def teardown():
     """removing feature-files"""
     os.remove(featurefile)
     for file in os.listdir(defdir):
@@ -56,6 +55,15 @@ def _teardown():
 
 class TestFileProcessing:
     """test processing of real files"""
+
+    def setUp(self):
+        """functions that run before running each test"""
+        STDERR = sys.stderr
+        sys.stderr = Mockstd()
+
+    def tearDown(self):
+        """runs after tests"""
+        sys.stderr = STDERR
 
     def test_featurefile(self):
         """ test function that takes filename and returns text from it """
@@ -67,4 +75,35 @@ class TestFileProcessing:
         core.find_and_import(featurefile)
         assert table[r'I add (?P<num1>\d*) and (?P<num2>\d*)'].__name__ == "add" 
         assert table['result should be (?P<res>\d*)'].__name__ =="result"
+
+    def test_bad_dir(self):
+        core.find_and_import("bla"+featurefile)
+        assert sys.stderr.read() == "Can`t find step_definitions directory\n"
+
+    def test_def_bad_filename(self):
+        """test with bad filename"""
+        badpath = os.path.join(filedir, "blabla.feature")
+        core.find_and_import(badpath)
+        assert sys.stderr.read() == "No matching definitions file for Feature: blabla\n"
+
+
+class TestPumpkinModule:
+    def setUp(self):
+        """functions that run before running each test"""
+        STDERR = sys.stderr
+        sys.stderr = Mockstd()
+
+    def tearDown(self):
+        """runs after tests"""
+        sys.stderr = STDERR
+
+    def test_nofile(self):
+        sys.argv = ['pumpkin.py']
+        import pumpkin.pumpkin
+        assert sys.stderr.read() == "no file specified\n"
+
+
+    def test_processing(self):
+        sys.argv = ['pumpkin.py',featurefile]
+        import pumpkin.pumpkin
 
