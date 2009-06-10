@@ -5,8 +5,63 @@ import os
 from pumpkin import parser
 from pumpkin import runner
 from pumpkin.pukorators import *
-from helpers import importCode, Mockstd
+from helpers import Mockstd
+from pumpkin import core
 STDERR = None   
+
+#######global setup&teardown#######
+feature_text = """\
+Feature: Work
+    In order to get Pumpkin working
+    As it`s developer
+    I want to test it
+
+    Scenario: Test math
+        Given I add 3759 and 3243
+        Then result should be 7002
+"""
+definitions_text = """\
+from pumpkin.pukorators import *
+@given(r'I add (?P<num1>\d*) and (?P<num2>\d*)')
+def add(num1,num2):
+    global RESULTS
+    RESULTS = int(num1) + int(num2)
+
+@then(r'result should be (?P<res>\d*)')
+def result(res):
+    assert int(res) == RESULTS
+"""
+filedir = os.path.abspath(os.path.dirname(__file__))
+defdir = os.path.join(filedir, "./step_definitions/")
+featurefile = os.path.join(filedir, "testing.feature")
+tempfile = os.path.join(filedir, "temp.py")
+def setup():
+    """creatig feature and def. files"""
+    feature_file = open(featurefile, 'w')
+    for line in feature_text:
+        feature_file.write(line)
+    feature_file.close()
+
+    if not os.path.isdir(defdir):
+        os.mkdir(defdir)
+    definitions_file = open(defdir+"testing.py", 'w')
+    for line in definitions_text:
+        definitions_file.write(line)
+    definitions_file.close()
+
+
+
+def teardown():
+    """removing feature-files"""
+    os.remove(featurefile)
+    for file in os.listdir(defdir):
+        os.remove(defdir+file)
+    os.rmdir(defdir)
+    import glob                 #for using wildcard file-search
+    for file in glob.glob(filedir+"/temp*"): #removing temp-files created by
+        os.remove(file)                      #the tests
+
+####### end of global setup&teardown#######
 
 class TestParser:
     """pumpkin Parser module takes gherkin-marked text and returns feature obj"""
@@ -257,6 +312,7 @@ Feature: Testing feature
         assert feature.scenarios[2].steps[2] == "Then I jump in the sand"
 
 
+
 class TestDecorators:
     """pumpkin decorators (pukorators). Adding their params into regexp-table and
     wrapping functions in try-except statements"""
@@ -275,7 +331,10 @@ def amiright():
 def imright():
     assert 2+2 == 4\
     """
-        importCode(code_def, "code_defn")
+        temp_file = open(filedir+"/temp_table_add.py", 'w')
+        temp_file.write(code_def)
+        temp_file.close()
+        import temp_table_add
         assert table["I think that 2+2=5"].__name__ == "amiright"
         assert table["I think that 2+2=4"].__name__ == "imright"
 
@@ -315,7 +374,10 @@ def amiright():
 
 
         feature = parser.parse(code_ftr)
-        importCode(code_def, "code_defn")
+        temp_file = open(filedir+"/temp_runner_fail.py", 'w')
+        temp_file.write(code_def)
+        temp_file.close()
+        import temp_runner_fail
         runner.run(feature,table)
         assert sys.stderr.read() == "amiright failed"
 
@@ -350,6 +412,60 @@ Feature: Testing feature
 """
 
         feature = parser.parse(code_ftr)
-        importCode(code_def, "code_defn")
+        temp_file = open(filedir+"/temp_match_param.py", 'w')
+        temp_file.write(code_def)
+        temp_file.close()
+        import temp_match_param
         runner.run(feature,table)
         assert sys.stderr.read() == ""
+
+
+class TestFileProcessing:
+    """test processing of real files"""
+
+    def setUp(self):
+        """functions that run before running each test"""
+        STDERR = sys.stderr
+        sys.stderr = Mockstd()
+
+    def tearDown(self):
+        """runs after tests"""
+        sys.stderr = STDERR
+
+    def test_def_file(self):
+        """ takes feature-file, and finds it`s definitions to run """
+        core.find_and_import(featurefile)
+        assert table[r'I add (?P<num1>\d*) and (?P<num2>\d*)'].__name__ == "add" 
+        assert table['result should be (?P<res>\d*)'].__name__ =="result"
+
+    def test_bad_dir(self):
+        core.find_and_import("bla"+featurefile)
+        assert sys.stderr.read() == "Can`t find step_definitions directory\n"
+
+    def test_def_bad_filename(self):
+        """test with bad filename"""
+        badpath = os.path.join(filedir, "blabla.feature")
+        core.find_and_import(badpath)
+        assert sys.stderr.read() == "No matching definitions file for Feature: blabla\n"
+
+
+class TestPumpkinModule:
+    def setUp(self):
+        """functions that run before running each test"""
+        STDERR = sys.stderr
+        sys.stderr = Mockstd()
+
+    def tearDown(self):
+        """runs after tests"""
+        sys.stderr = STDERR
+
+    def test_nofile(self):
+        sys.argv = ['pumpkin.py']
+        import pumpkin.pumpkin
+        assert sys.stderr.read() == "no file specified\n"
+
+    def test_processing(self):
+        sys.argv = ['pumpkin.py',featurefile]
+        import pumpkin.pumpkin
+        assert sys.stderr.read() == ""
+
