@@ -6,10 +6,7 @@ from pumpkin import parser
 from pumpkin import runner
 from pumpkin.pukorators import *
 from helpers import Mockstd
-from pumpkin import core
 STDERR = None   
-
-#######global setup&teardown#######
 
 testsdir = os.path.abspath(os.path.dirname(__file__))
 filedir = os.path.join(testsdir, "test_files/")
@@ -20,12 +17,6 @@ def setup():
     """creatig feature and def. files"""
     sys.path.append(defdir)
 
-
-
-def teardown():
-    """removing feature-files"""
-    pass
-####### end of global setup&teardown#######
 
 class TestParser:
     """pumpkin Parser module takes gherkin-marked text and returns feature obj"""
@@ -316,7 +307,6 @@ Feature: Testing feature
             """
 
         feature = parser.parse(code_ftr)
-
         import runner_fail
         runner.run(feature,table)
         assert sys.stderr.read() == "amiright failed"
@@ -327,7 +317,6 @@ Feature: Testing feature
         now test for using variables as parameters for decorators
         """
 
-
         code_ftr = """\
 Feature: Testing feature
     I want to use nice tools
@@ -336,42 +325,10 @@ Feature: Testing feature
         Given I think : 3 + 2 = 5
         When answer is 5, then it sounds "five"\
 """
-
         feature = parser.parse(code_ftr)
-    
         import match_param
         runner.run(feature,table)
         assert sys.stderr.read() == ""
-
-
-class TestFileProcessing:
-    """test processing of real files"""
-
-    def setUp(self):
-        """functions that run before running each test"""
-        STDERR = sys.stderr
-        sys.stderr = Mockstd()
-
-    def tearDown(self):
-        """runs after tests"""
-        sys.stderr = STDERR
-
-    def test_def_file(self):
-        """ takes feature-file, and finds it`s definitions to run """
-        core.find_and_import(featurefile)
-        assert table[r'I add (?P<num1>\d*) and (?P<num2>\d*)'].__name__ == "add" 
-        assert table['result should be (?P<res>\d*)'].__name__ =="result"
-
-    def test_bad_dir(self):
-        core.find_and_import("bla"+featurefile)
-        assert sys.stderr.read() == "Can`t find step_definitions directory\n"
-
-    def test_def_bad_filename(self):
-        """test with bad filename"""
-        badpath = os.path.join(filedir, "blabla.feature")
-        core.find_and_import(badpath)
-        assert sys.stderr.read() == "No matching definitions file for Feature: blabla\n"
-
 
 class TestPumpkinModule:
     def setUp(self):
