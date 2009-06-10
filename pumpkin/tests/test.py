@@ -10,57 +10,21 @@ from pumpkin import core
 STDERR = None   
 
 #######global setup&teardown#######
-feature_text = """\
-Feature: Work
-    In order to get Pumpkin working
-    As it`s developer
-    I want to test it
 
-    Scenario: Test math
-        Given I add 3759 and 3243
-        Then result should be 7002
-"""
-definitions_text = """\
-from pumpkin.pukorators import *
-@given(r'I add (?P<num1>\d*) and (?P<num2>\d*)')
-def add(num1,num2):
-    global RESULTS
-    RESULTS = int(num1) + int(num2)
-
-@then(r'result should be (?P<res>\d*)')
-def result(res):
-    assert int(res) == RESULTS
-"""
-filedir = os.path.abspath(os.path.dirname(__file__))
-defdir = os.path.join(filedir, "./step_definitions/")
-featurefile = os.path.join(filedir, "testing.feature")
+testsdir = os.path.abspath(os.path.dirname(__file__))
+filedir = os.path.join(testsdir, "test_files/")
+defdir = os.path.join(filedir, "step_definitions/")
+featurefile = os.path.join(filedir, "working.feature")
 tempfile = os.path.join(filedir, "temp.py")
 def setup():
     """creatig feature and def. files"""
-    feature_file = open(featurefile, 'w')
-    for line in feature_text:
-        feature_file.write(line)
-    feature_file.close()
-
-    if not os.path.isdir(defdir):
-        os.mkdir(defdir)
-    definitions_file = open(defdir+"testing.py", 'w')
-    for line in definitions_text:
-        definitions_file.write(line)
-    definitions_file.close()
+    sys.path.append(defdir)
 
 
 
 def teardown():
     """removing feature-files"""
-    os.remove(featurefile)
-    for file in os.listdir(defdir):
-        os.remove(defdir+file)
-    os.rmdir(defdir)
-    import glob                 #for using wildcard file-search
-    for file in glob.glob(filedir+"/temp*"): #removing temp-files created by
-        os.remove(file)                      #the tests
-
+    pass
 ####### end of global setup&teardown#######
 
 class TestParser:
@@ -321,20 +285,8 @@ class TestDecorators:
         """
         add decorated snippet of code to table compilance
         """
-        code_def = """\
-from pumpkin.pukorators import *
-@given('I think that 2+2=5')
-def amiright():
-    assert 2+2 == 5
-
-@then('I think that 2+2=4')
-def imright():
-    assert 2+2 == 4\
-    """
-        temp_file = open(filedir+"/temp_table_add.py", 'w')
-        temp_file.write(code_def)
-        temp_file.close()
-        import temp_table_add
+        
+        import table_add
         assert table["I think that 2+2=5"].__name__ == "amiright"
         assert table["I think that 2+2=4"].__name__ == "imright"
 
@@ -349,8 +301,6 @@ class TestRunner:
     def tearDown(self):
         """runs after tests"""
         sys.stderr = STDERR
-        code_def = None
-        code_defn = None
         table = None
 
     def test_runner_fail(self):
@@ -365,19 +315,9 @@ Feature: Testing feature
         Given I think that 2 + 2 = 5
             """
 
-        code_def = """\
-from pumpkin.pukorators import *
-@given(r'I think that \d [+] \d = \d')
-def amiright():
-    assert 2 + 2 == 5
-"""
-
-
         feature = parser.parse(code_ftr)
-        temp_file = open(filedir+"/temp_runner_fail.py", 'w')
-        temp_file.write(code_def)
-        temp_file.close()
-        import temp_runner_fail
+
+        import runner_fail
         runner.run(feature,table)
         assert sys.stderr.read() == "amiright failed"
 
@@ -386,21 +326,7 @@ def amiright():
         """
         now test for using variables as parameters for decorators
         """
-        code_def = """\
-from pumpkin.pukorators import *
-@given(r'I think : (?P<var1>\d) [+] (?P<var2>\d) = (?P<var3>\d)')
-def amiright_again(var1,var2,var3):
-    assert int(var1) + int(var2) == int(var3)
 
-@when(r'answer is (?P<digit>\d), then it sounds "(?P<word>.*)"')
-def digit_is_word(digit,word):
-    if digit == "1":
-        assert word == "one"
-    elif digit == "5":
-        assert word == "five"
-    else:
-        raise Exception
-"""
 
         code_ftr = """\
 Feature: Testing feature
@@ -412,10 +338,8 @@ Feature: Testing feature
 """
 
         feature = parser.parse(code_ftr)
-        temp_file = open(filedir+"/temp_match_param.py", 'w')
-        temp_file.write(code_def)
-        temp_file.close()
-        import temp_match_param
+    
+        import match_param
         runner.run(feature,table)
         assert sys.stderr.read() == ""
 
