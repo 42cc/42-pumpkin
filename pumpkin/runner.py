@@ -12,8 +12,7 @@ def run(feature, table):
     for scenario in feature.scenarios:
         print "\n    Scenario: " + scenario.name
         for step_def in scenario.steps:
-            sys.stdout.write("\t%s\t|\t" % step_def)    #using stduot 
-                #because we dont want newline at the end
+            print("\t%s\t|\t" % step_def),    #coma at the end = no newline 
             matched = False
             for regexp in table:
                 match = re.search(regexp, step_def)
