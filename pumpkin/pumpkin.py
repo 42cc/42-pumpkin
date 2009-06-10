@@ -1,13 +1,14 @@
-import sys
+import sys, os
 from parser import parse
 from pukorators import *
 from runner import run
-from core import find_and_import
 
 def process(filename):
     feature_text = file(filename).read()
     feature = parse(feature_text)
-    find_and_import(filename)
+    filedir = os.path.dirname(filename)
+    sys.path.append(filedir)
+    import step_definitions
     run(feature,table)
 
 if len(sys.argv) < 2:

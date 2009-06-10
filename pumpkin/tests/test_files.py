@@ -4,7 +4,6 @@ import sys
 import os
 from pumpkin import parser
 from pumpkin import runner
-from pumpkin import core
 from pumpkin.pukorators import *
 from helpers import importCode, Mockstd
 STDERR = None
@@ -52,34 +51,6 @@ def teardown():
     for file in os.listdir(defdir):
         os.remove(defdir+file)
     os.rmdir(defdir)
-
-class TestFileProcessing:
-    """test processing of real files"""
-
-    def setUp(self):
-        """functions that run before running each test"""
-        STDERR = sys.stderr
-        sys.stderr = Mockstd()
-
-    def tearDown(self):
-        """runs after tests"""
-        sys.stderr = STDERR
-
-    def test_def_file(self):
-        """ takes feature-file, and finds it`s definitions to run """
-        core.find_and_import(featurefile)
-        assert table[r'I add (?P<num1>\d*) and (?P<num2>\d*)'].__name__ == "add" 
-        assert table['result should be (?P<res>\d*)'].__name__ =="result"
-
-    def test_bad_dir(self):
-        core.find_and_import("bla"+featurefile)
-        assert sys.stderr.read() == "Can`t find step_definitions directory\n"
-
-    def test_def_bad_filename(self):
-        """test with bad filename"""
-        badpath = os.path.join(filedir, "blabla.feature")
-        core.find_and_import(badpath)
-        assert sys.stderr.read() == "No matching definitions file for Feature: blabla\n"
 
 
 class TestPumpkinModule:
