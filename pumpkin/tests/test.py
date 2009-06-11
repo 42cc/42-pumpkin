@@ -294,24 +294,7 @@ class TestRunner:
         sys.stderr = STDERR
         table = None
 
-    def test_runner_fail(self):
-        """
-        test runner with failing functions 
-        """
-        code_ftr= """\
-Feature: Testing feature
-    I want to use nice tools
-
-    Scenario: test math
-        Given I think that 2 + 2 = 5
-            """
-
-        feature = parser.parse(code_ftr)
-        import runner_fail
-        runner.run(feature,table)
-        assert sys.stderr.read() == "amiright failed"
-
-
+  
     def test_matching_params(self):
         """
         now test for using variables as parameters for decorators

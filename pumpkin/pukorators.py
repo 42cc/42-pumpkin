@@ -8,7 +8,7 @@ def given(regexp):
             try:
                 function(*args,**kwargs)
             except:
-                sys.stderr.write("%s failed" % function.__name__)
+                print "%s failed" % function.__name__
                 print sys.exc_info()[1]
             else:
                 print "%s done" % function.__name__
