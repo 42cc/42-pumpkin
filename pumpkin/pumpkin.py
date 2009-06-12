@@ -8,7 +8,13 @@ def process(filename):
     feature = parse(feature_text)
     filedir = os.path.dirname(filename)
     sys.path.append(filedir)
-    import step_definitions
+    if os.path.isdir(filedir+"/step_definitions"):
+        try:
+            import step_definitions
+        except:
+            sys.stderr.write("Can`t import step_definitions")
+    else:
+        sys.stderr.write("Warning: Can`t find step_definitions directory\n")
     run(feature,table)
 
 if len(sys.argv) < 2:
