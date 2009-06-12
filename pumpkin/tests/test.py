@@ -7,7 +7,8 @@ from pumpkin import runner
 from pumpkin.pukorators import *
 from helpers import Mockstd
 STDERR = None   
-
+sys.argv = ['pumpkin.py']           #Needed for correct import on next line
+import pumpkin.pumpkin as pumpkicore   #importing pumpkin executable
 testsdir = os.path.abspath(os.path.dirname(__file__))
 filedir = os.path.join(testsdir, "test_files/")
 featurefile = os.path.join(filedir, "good/working.feature")
@@ -16,7 +17,6 @@ faildir = os.path.join(filedir, "failing/")
 def setup():
     """creatig feature and def. files"""
     sys.path.append(defdir)
-
 
 class TestParser:
     """pumpkin Parser module takes gherkin-marked text and returns feature obj"""
@@ -326,34 +326,26 @@ class TestPumpkinModule:
     def test_nofile(self):
         """test that pumpkin exits properly when no file is specified"""
         sys.argv = ['pumpkin.py']
-        import pumpkin.pumpkin as pmpk
-        reload(pmpk)
+        reload(pumpkicore)
         assert sys.stderr.read() == "no file specified\n"
-        del pmpk
 
     def test_no_defdir(self):
         """feature-file is specified and ok, but no definitions dir"""
         failfile = os.path.join(filedir, "failing/1/fail.feature")
         sys.argv = ['pumpkin.py', failfile]
-        import pumpkin.pumpkin as pmpk
-        reload(pmpk)
+        reload(pumpkicore)
         assert sys.stderr.read() == "Warning: Can`t find step_definitions directory\n"
-        del pmpk
 
     def test_defdir_nomodule(self):
         """definitions dir exists, but not as a python module"""
         failfile = os.path.join(filedir, "failing/2/fail.feature")
         sys.argv = ['pumpkin.py', failfile]
-        import pumpkin.pumpkin as pmpk
-        reload(pmpk)
+        reload(pumpkicore)
         assert sys.stderr.read().startswith("Can`t import") == True
-        del pmpk
         
     def test_processing(self):
         """test that when everything is ok, pumpkin works ok"""
         sys.argv = ['pumpkin.py',featurefile]
-        import pumpkin.pumpkin as pmpk
-        reload(pmpk)
+        reload(pumpkicore)
         assert sys.stderr.read() == ""
-        del pmpk
 
