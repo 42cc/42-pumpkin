@@ -13,7 +13,7 @@ ntest:
 
 gitsubmodules:
 	-git submodule init
-	-git submodule add trac.khavr.com:/var/lib/git/tddspry lib/tddspry
+	-git submodule add  github.com/42/tddspry.git lib/tddspry
 	git submodule update
 	#fix for updating git submodules
 	#cd tests/tddspry; git pull origin master
