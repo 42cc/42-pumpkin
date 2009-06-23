@@ -4,6 +4,7 @@ import sys
 import os
 from pumpkin import parser
 from pumpkin import runner
+from pumpkin import loader
 from pumpkin.pukorators import *
 from helpers import Mockstd
 STDERR = None   
@@ -12,8 +13,9 @@ import pumpkin.pumpkin as pumpkicore   #importing pumpkin executable
 testsdir = os.path.abspath(os.path.dirname(__file__))
 filedir = os.path.join(testsdir, "test_files/")
 featurefile = os.path.join(filedir, "good/working.feature")
-defdir = os.path.join(filedir, "good/step_definitions/")
+gooddir = os.path.join(filedir, "good/")
 faildir = os.path.join(filedir, "failing/")
+defdir = os.path.join(gooddir, "step_definitions/")
 def setup():
     """creatig feature and def. files"""
     sys.path.append(defdir)
@@ -348,4 +350,18 @@ class TestPumpkinModule:
         sys.argv = ['pumpkin.py',featurefile]
         reload(pumpkicore)
         assert sys.stderr.read() == ""
+
+class TestLoader():
+    """loader module. Loads step_definitions and support (setup/teardown)"""
+    def setUp(self):
+        sys.path.append(gooddir)
+    def tearDown(self):
+        sys.path.remove(gooddir)
+
+    def test_load_support(self):
+        loader.load_support(gooddir)
+        assert loader.before_all() == "before"
+        assert loader.setup() == 5
+        assert loader.teardown() == "teardownd"
+        assert loader.after_all() == "done"
 
