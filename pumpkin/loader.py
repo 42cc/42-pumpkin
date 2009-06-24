@@ -1,16 +1,23 @@
 # -*- coding: utf-8 -*-
-import sys,os
+"""module that loads user-provided python code:
+support-funcitons (setup/teardown) and step definitions
+"""
+import sys
+import os
 
-def load_support(filedir):        
+
+def load_support(filedir):
     """load support functions (environment, setup/teardown)
     ugly for now
     """
-    def emptyfunc():                        #just callable that does nothing
+
+    def emptyfunc():
+        """just callable that does nothing"""
         pass
-    #in case that user can provide no env-functions at all, but they should 
+    #in case that user can provide no env-functions at all, but they should
     #be called
-    funcs = {"before_all":emptyfunc, "setup":emptyfunc,\
-    "teardown":emptyfunc, "after_all":emptyfunc}
+    funcs = {"before_all": emptyfunc, "setup": emptyfunc, \
+    "teardown": emptyfunc, "after_all": emptyfunc}
 
     if os.path.isdir(filedir+"support/"):
         try:
@@ -30,6 +37,7 @@ Please check __init__.py inside dir\n""")
 
 
 def load_definitions(filedir):
+    """load user provided step definitions"""
     if os.path.isdir(filedir+"/step_definitions"):
         try:
             import step_definitions
@@ -40,4 +48,3 @@ Please check __init__.py inside dir\n""")
             sys.stderr.write(str(sys.exc_info()[1]))
     else:
         sys.stderr.write("Warning: Can`t find step_definitions directory\n")
-

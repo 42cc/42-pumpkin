@@ -6,6 +6,8 @@ from parser import parse
 from pukorators import table
 from runner import run
 from loader import load_support, load_definitions
+
+
 def process(filename):
     """take input file and run it"""
     feature_text = file(filename).read()

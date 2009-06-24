@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+"""take everything processed before and run it!"""
 import re
-import sys
-def run(feature, table, env_funcs):        
+
+
+def run(feature, table, env_funcs):
     """
     make matches between feature-definitions and regexp-func
     table returned from pukorators
@@ -14,7 +16,7 @@ def run(feature, table, env_funcs):
         print "\n    Scenario: " + scenario.name
         env_funcs["setup"]()
         for step_def in scenario.steps:
-            print("\t%s\t|\t" % step_def),    #coma at the end = no newline 
+            print("\t%s\t|\t" % step_def),    #coma at the end = no newline
             matched = False
             for regexp in table:
                 match = re.search(regexp, step_def)
@@ -27,4 +29,3 @@ def run(feature, table, env_funcs):
                 print "Pending (no matching function)"
         env_funcs["teardown"]()
     env_funcs["after_all"]()
-    
