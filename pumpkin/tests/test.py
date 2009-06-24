@@ -12,10 +12,10 @@ sys.argv = ['pumpkin.py']           #Needed for correct import on next line
 import pumpkin.pumpkin as pumpkicore   #importing pumpkin executable
 testsdir = os.path.abspath(os.path.dirname(__file__))
 filedir = os.path.join(testsdir, "test_files/")
-featurefile = os.path.join(filedir, "good/working.feature")
+featurefile = os.path.join(filedir, "good/1/working.feature")
 gooddir = os.path.join(filedir, "good/")
 faildir = os.path.join(filedir, "failing/")
-defdir = os.path.join(gooddir, "step_definitions/")
+defdir = os.path.join(gooddir, "1/step_definitions/")
 def setup():
     """creatig feature and def. files"""
     sys.path.append(defdir)
@@ -353,15 +353,39 @@ class TestPumpkinModule:
 
 class TestLoader():
     """loader module. Loads step_definitions and support (setup/teardown)"""
+
     def setUp(self):
-        sys.path.append(gooddir)
+        sys.stderr = Mockstd()
+        reload(loader)
+
     def tearDown(self):
-        sys.path.remove(gooddir)
+        pass
 
     def test_load_support(self):
-        loader.load_support(gooddir)
-        assert loader.before_all() == "before"
-        assert loader.setup() == 5
-        assert loader.teardown() == "teardownd"
-        assert loader.after_all() == "done"
+        """loading full-featured support file
+        with global and local setups/teardowns"""
+        sys.path.append(gooddir+"/1/")
+        funcs = loader.load_support(gooddir+"/1/")
+        assert funcs["before_all"]() == "before"
+        assert funcs["setup"]() == 5
+        assert funcs["teardown"]() == "teardownd"
+        assert funcs["after_all"]() == "done"
+        sys.path.remove(gooddir+"/1/")
 
+    def test_bad_support(self):
+        """support dir exists, but not a module"""
+        sys.path.append(faildir+"/2")
+        funcs = loader.load_support(faildir+"/2/")
+        assert sys.stderr.read().startswith("Can`t import support")
+        sys.path.remove(faildir+"/2")
+
+
+    def test_not_full_support(self):
+        """support only with local setup&teardown"""
+        sys.path.append(gooddir+"/2/")
+        funcs = loader.load_support(gooddir+"/2/")
+        print sys.stderr.read()
+        assert funcs["setup"]() == 6
+        assert funcs["teardown"]() == "teardownd2"
+        assert funcs["after_all"]() == None
+        sys.path.remove(gooddir+"/2/")

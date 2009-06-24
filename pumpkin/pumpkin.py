@@ -14,7 +14,7 @@ def process(filename):
         except:
             sys.stderr.write("""Can`t import step_definitions
 direcroty exists, but is not a python module.
-Please check __init__.py inside dir""")
+Please check __init__.py inside dir\n""")
     else:
         sys.stderr.write("Warning: Can`t find step_definitions directory\n")
     run(feature,table)
