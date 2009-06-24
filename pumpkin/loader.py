@@ -27,3 +27,17 @@ direcroty exists, but is not a python module.
 Please check __init__.py inside dir\n""")
             sys.stderr.write(str(sys.exc_info()[1]))
     return funcs
+
+
+def load_definitions(filedir):
+    if os.path.isdir(filedir+"/step_definitions"):
+        try:
+            import step_definitions
+        except:
+            sys.stderr.write("""Can`t import step_definitions
+direcroty exists, but is not a python module.
+Please check __init__.py inside dir\n""")
+            sys.stderr.write(str(sys.exc_info()[1]))
+    else:
+        sys.stderr.write("Warning: Can`t find step_definitions directory\n")
+

@@ -1,28 +1,23 @@
-import sys, os
+# -*- coding: utf-8 -*-
+"""pumpkin main module, which runs everything"""
+import sys
+import os
 from parser import parse
-from pukorators import *
+from pukorators import table
 from runner import run
-from loader import load_support
+from loader import load_support, load_definitions
 def process(filename):
+    """take input file and run it"""
     feature_text = file(filename).read()
     feature = parse(feature_text)
     filedir = os.path.dirname(filename)
     sys.path.append(filedir)
     env_funcs = load_support(filedir)
-    if os.path.isdir(filedir+"/step_definitions"):
-        try:
-            import step_definitions
-        except:
-            sys.stderr.write("""Can`t import step_definitions
-direcroty exists, but is not a python module.
-Please check __init__.py inside dir\n""")
-            sys.stderr.write(str(sys.exc_info()[1]))
-    else:
-        sys.stderr.write("Warning: Can`t find step_definitions directory\n")
+    load_definitions(filedir)
     run(feature, table, env_funcs)
 
 if len(sys.argv) < 2:
     sys.stderr.write("no file specified\n")
 else:
-    for filename in sys.argv[1:]:
-        process(filename)
+    for fname in sys.argv[1:]:
+        process(fname)
