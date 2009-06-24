@@ -18,12 +18,12 @@ def load_support(filedir):
             for key in funcs:               #now looking for matched in user-
                 if hasattr(support, key):   #provided functions
                     funcs[key] = getattr(support, key)
-            del sys.modules['support']      #removing module, because if we
-            return funcs                    #run this once again, it will do
+            del sys.modules['support']      #removing the module, because if we
+                                            #run this once again, it will do
                                             #nothing (on import)
         except:
             sys.stderr.write("""Can`t import support
 direcroty exists, but is not a python module.
 Please check __init__.py inside dir\n""")
-    else:
-        sys.stderr.write("Warning: Can`t find step_definitions directory\n")
+            sys.stderr.write(str(sys.exc_info()[1]))
+    return funcs

@@ -8,10 +8,10 @@ def given(regexp):
             try:
                 function(*args,**kwargs)
             except:
-                print "%s failed" % function.__name__
-                print sys.exc_info()[1]
-            else:
-                print "%s done" % function.__name__
+                print "%s failed" % function.__name__   #not using sys.stderr
+                print sys.exc_info()[1]                 #because it breaks output 
+            else:                                       #formating when mixed 
+                print "%s done" % function.__name__     #with prints
         wrapper.__name__ = function.__name__
         wrapper.__doc__ = function.__doc__
         wrapper.__dict__.update(function.__dict__)

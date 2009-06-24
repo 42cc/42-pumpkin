@@ -16,9 +16,8 @@ featurefile = os.path.join(filedir, "good/1/working.feature")
 gooddir = os.path.join(filedir, "good/")
 faildir = os.path.join(filedir, "failing/")
 defdir = os.path.join(gooddir, "1/step_definitions/")
-def setup():
-    """creatig feature and def. files"""
-    sys.path.append(defdir)
+sys.path.append(defdir)
+PATH = sys.path[:]                   #backing up sys.path
 
 class TestParser:
     """pumpkin Parser module takes gherkin-marked text and returns feature obj"""
@@ -290,6 +289,7 @@ class TestRunner:
         """functions that run before running each test"""
         STDERR = sys.stderr
         sys.stderr = Mockstd()
+        sys.path = PATH[:]
 
     def tearDown(self):
         """runs after tests"""
@@ -309,11 +309,35 @@ Feature: Testing feature
     Scenario: test math
         Given I think : 3 + 2 = 5
         When answer is 5, then it sounds "five"\
+"""    
+        def emptyfunc():
+            pass
+        funcs = {"before_all":emptyfunc, "setup":emptyfunc,\
+        "teardown":emptyfunc, "after_all":emptyfunc}
+        feature = parser.parse(code_ftr)
+        import match_param
+        runner.run(feature, table, funcs)
+        assert sys.stderr.read() == ""
+        
+    def test_with_support(self):
+        """
+        now with support functions
+        """
+        code_ftr = """\
+Feature: Testing feature
+    I want to use nice tools
+
+    Scenario: test math
+        Given I think : 3 + 2 = 5
+        When answer is 5, then it sounds "five"\
 """
         feature = parser.parse(code_ftr)
         import match_param
-        runner.run(feature,table)
-        assert sys.stderr.read() == ""
+        sys.path.append(gooddir+"3")
+        env_funcs = loader.load_support(gooddir+"3/")
+        sys.path.remove(gooddir+"3")
+        runner.run(feature, table, env_funcs)
+        assert sys.stderr.read() == "beforesetupteardownafter" #;)
 
 class TestPumpkinModule:
     def setUp(self):
@@ -356,7 +380,7 @@ class TestLoader():
 
     def setUp(self):
         sys.stderr = Mockstd()
-        reload(loader)
+        #reload(loader)
 
     def tearDown(self):
         pass
@@ -384,7 +408,6 @@ class TestLoader():
         """support only with local setup&teardown"""
         sys.path.append(gooddir+"/2/")
         funcs = loader.load_support(gooddir+"/2/")
-        print sys.stderr.read()
         assert funcs["setup"]() == 6
         assert funcs["teardown"]() == "teardownd2"
         assert funcs["after_all"]() == None

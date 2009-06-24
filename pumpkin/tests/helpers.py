@@ -13,6 +13,6 @@ class Mockstd(Mock):
     def __init__(self):
         self.text = ""
     def write(self, err):
-        self.text = err
+        self.text += err
     def read(self):
         return self.text
