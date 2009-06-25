@@ -18,8 +18,7 @@ def load_support(filedir):
     #be called
     funcs = {"before_all": emptyfunc, "setup": emptyfunc, \
     "teardown": emptyfunc, "after_all": emptyfunc}
-
-    if os.path.isdir(filedir+"support/"):
+    if os.path.isdir(filedir+"/support/"):
         try:
             import support
             for key in funcs:               #now looking for matched in user-
