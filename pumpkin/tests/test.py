@@ -266,9 +266,8 @@ Feature: Testing feature
         assert feature.scenarios[2].steps[0] == "Given I am in the sandstorm"
         assert feature.scenarios[2].steps[1] == "When I jump up"
         assert feature.scenarios[2].steps[2] == "Then I jump in the sand"
-
-
-
+    
+    
 class TestDecorators:
     """pumpkin decorators (pukorators). Adding their params into regexp-table and
     wrapping functions in try-except statements"""

@@ -29,7 +29,8 @@ def parse(text):
 
     state = "feature"
     feature = None
-    text = indent_style(text)
+    text = text.split('\n')
+    indent = indent_style(text)
     for line in text:
         if state == "feature":
             feature = create_feature(line)
@@ -37,16 +38,16 @@ def parse(text):
         elif state == "f.description":
             if line.strip() == "":
                 state = "scenario"
-            elif line.startswith("    "):
+            elif line.startswith(indent):
                 feature = add_description(feature, line.strip())
         elif state == "scenario":
-            if line.startswith("    "):
+            if line.startswith(indent):
                 feature = create_scenario(feature, line.strip())
                 state = "step"
         elif state == "step":
             if line.strip() == "":
                 state = "scenario"
-            elif line.startswith("        "):
+            elif line.startswith(indent*2):
                 feature.scenarios[-1].steps.append(line.strip())
     return feature
 
@@ -60,23 +61,17 @@ def indent_style(text):
     in future: possibly clean-up text, erase comment & etc
     """
     import re
-    lines = text.split("\n")
-    if len(lines) > 1:
-        indent = ""                      #tabulation actually used in text
-        for symbol in lines[1]:
+    if len(text) > 1:
+        indent = ""
+        for symbol in text[1]:
             if re.match('\s', symbol):
                 indent += symbol         #for multi-spaces
             else:
                 break
-        indsymbol = "    "               #indentation symbol that we use
-        newlines = []
-        for line in lines:
-            line = re.sub('^'+indent, indsymbol, line)
-            line = re.sub('^'+indsymbol+indent, indsymbol+indsymbol, line)
-            newlines.append(line)
-        return newlines
+        return indent
     else:
-        return lines
+        return ""
+
 
 
 def create_feature(line):
