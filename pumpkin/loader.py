@@ -21,7 +21,7 @@ def load_support(filedir):
     if os.path.isdir(filedir+"/support/"):
         try:
             import support
-            for key in funcs:               #now looking for matched in user-
+            for key in funcs:               #now looking for matches in user-
                 if hasattr(support, key):   #provided functions
                     funcs[key] = getattr(support, key)
             del sys.modules['support']      #removing the module, because if we
@@ -36,10 +36,15 @@ Please check __init__.py inside dir\n""")
 
 
 def load_definitions(filedir):
-    """load user provided step definitions"""
+    """
+    load and user provided step definitions
+    when they are imported, they are added to the table of functions
+    via pukorators
+    """
     if os.path.isdir(filedir+"/step_definitions"):
         try:
             import step_definitions
+            del sys.modules['step_definitions']   #again for multiple features
         except:
             sys.stderr.write("""Can`t import step_definitions
 direcroty exists, but is not a python module.

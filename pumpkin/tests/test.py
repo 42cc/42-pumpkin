@@ -268,6 +268,28 @@ Feature: Testing feature
         assert feature.scenarios[2].steps[2] == "Then I jump in the sand"
     
     
+    def test_all_commented(self):
+        """adding ability to have feature text commented"""
+        text = """\
+#Feature: comments
+    #In order to comment
+    #I want this text not to be processed\
+"""
+        text = text.split('\n')
+        stripd_text = parser.strip_comments(text)
+        assert stripd_text == []
+
+    def test_commented(self):
+        """adding ability to have feature text commented"""
+        text = """\
+Feature: comments
+    #In order to comment
+    I want this to be\
+"""
+        text = text.split('\n')
+        stripd_text = parser.strip_comments(text)
+        assert stripd_text == ['Feature: comments', '    I want this to be']
+
 class TestDecorators:
     """pumpkin decorators (pukorators). Adding their params into regexp-table and
     wrapping functions in try-except statements"""
