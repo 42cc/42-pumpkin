@@ -1,4 +1,4 @@
-from pukorators import *
+from pumpkin.pukorators import *
 @given(r'I add (?P<num1>\d*) and (?P<num2>\d*)')
 def add(num1,num2):
     global RESULTS
