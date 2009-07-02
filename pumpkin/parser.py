@@ -76,7 +76,7 @@ def strip_comments(txt):
     """remove commented lines from text"""
     new_text = txt[:]           #copying the text, because we will need
     for line in txt:            #to iterate it, and removing items while
-        print line              #iterating through them causes strange things
+                                #iterating through them causes strange things
         if line.strip().startswith('#'):
             new_text.remove(line)
     return new_text
